@@ -24,6 +24,7 @@ import {
 } from './auth-service';
 
 type AuthMode = 'login' | 'register';
+type LoginMethod = 'phone' | 'email';
 type RegistrationMethod = 'phone' | 'email';
 
 const registrationAssets = {
@@ -63,6 +64,7 @@ export function AuthPrototypeScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [mode, setMode] = useState<AuthMode>('login');
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('phone');
   const [registrationMethod, setRegistrationMethod] =
     useState<RegistrationMethod>('phone');
   const [displayName, setDisplayName] = useState('');
@@ -85,6 +87,8 @@ export function AuthPrototypeScreen() {
     setMode(nextMode);
     if (nextMode === 'register') {
       setRegistrationMethod('phone');
+    } else {
+      setLoginMethod('phone');
     }
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -94,6 +98,12 @@ export function AuthPrototypeScreen() {
 
   function changeRegistrationMethod(nextMethod: RegistrationMethod) {
     setRegistrationMethod(nextMethod);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  }
+
+  function changeLoginMethod(nextMethod: LoginMethod) {
+    setLoginMethod(nextMethod);
     setErrorMessage(null);
     setSuccessMessage(null);
   }
@@ -137,6 +147,40 @@ export function AuthPrototypeScreen() {
     setErrorMessage(
       'Phone registration is not enabled in Firebase yet. Use Register with Email below for now.',
     );
+  }
+
+  async function submitLogin() {
+    if (loginMethod === 'email') {
+      await submit();
+      return;
+    }
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (phoneNumber.replace(/\D/g, '').length < 9) {
+      setErrorMessage('Enter a valid Ghana phone number.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Use a password with at least six characters.');
+      return;
+    }
+
+    setErrorMessage(
+      'Phone login is not enabled in Firebase yet. Use Login with Email below for now.',
+    );
+  }
+
+  async function handleLoginPasswordReset() {
+    if (loginMethod === 'phone') {
+      changeLoginMethod('email');
+      setErrorMessage('Enter your email address, then tap Forget Password again.');
+      return;
+    }
+
+    await resetPassword();
   }
 
   async function submit() {
@@ -497,110 +541,202 @@ export function AuthPrototypeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.loginScreen}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
       >
         <ScrollView
-          contentContainerStyle={styles.formContent}
+          contentContainerStyle={styles.loginScrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.brand}>Shopicom</Text>
-          <Text style={styles.heading}>Login</Text>
-          <Text style={styles.supportingText}>
-            Sign in with your development account.
-          </Text>
+          <View style={styles.loginCanvas}>
+            <View pointerEvents="none" style={styles.loginArtContainer}>
+              <Image
+                accessible={false}
+                resizeMode="contain"
+                source={registrationAssets.background}
+                style={styles.loginArt}
+              />
+            </View>
 
-          <View accessibilityRole="tablist" style={styles.modeControl}>
-            <Pressable
-              accessibilityRole="tab"
-              accessibilityState={{ selected: true }}
-              onPress={() => changeMode('login')}
-              style={[styles.modeButton, styles.modeButtonSelected]}
-            >
-              <Text style={[styles.modeButtonText, styles.modeButtonTextSelected]}>
-                Login
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="tab"
-              accessibilityState={{ selected: false }}
-              onPress={() => changeMode('register')}
-              style={styles.modeButton}
-            >
-              <Text style={styles.modeButtonText}>Register</Text>
-            </Pressable>
+            <View style={styles.loginContent}>
+              <Text style={styles.loginHeading}>Login</Text>
+              <View style={styles.loginAccountRow}>
+                <Text style={styles.loginAccountText}>
+                  Don't have an account yet?
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  onPress={() => changeMode('register')}
+                >
+                  <Text style={styles.loginRegisterLink}>Register</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.loginFields}>
+                <View style={styles.registrationInputShell}>
+                  {loginMethod === 'phone' ? (
+                    <Text
+                      numberOfLines={1}
+                      style={styles.registrationPhonePrefix}
+                    >
+                      +233
+                    </Text>
+                  ) : (
+                    <Image
+                      accessible={false}
+                      resizeMode="contain"
+                      source={registrationAssets.mail}
+                      style={styles.registrationFieldIcon}
+                    />
+                  )}
+                  <TextInput
+                    accessibilityLabel={
+                      loginMethod === 'phone' ? 'Phone number' : 'Email address'
+                    }
+                    autoCapitalize="none"
+                    autoComplete={loginMethod === 'phone' ? 'tel' : 'email'}
+                    editable={!isSubmitting}
+                    inputMode={loginMethod === 'phone' ? 'tel' : 'email'}
+                    keyboardType={
+                      loginMethod === 'phone' ? 'phone-pad' : 'email-address'
+                    }
+                    onChangeText={
+                      loginMethod === 'phone' ? setPhoneNumber : setEmail
+                    }
+                    placeholder={
+                      loginMethod === 'phone'
+                        ? 'Enter Phone Number'
+                        : 'Enter Email Address'
+                    }
+                    placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                    style={styles.registrationInput}
+                    value={loginMethod === 'phone' ? phoneNumber : email}
+                  />
+                </View>
+
+                <View style={styles.registrationInputShell}>
+                  <Image
+                    accessible={false}
+                    resizeMode="contain"
+                    source={registrationAssets.lock}
+                    style={styles.registrationFieldIconMuted}
+                  />
+                  <TextInput
+                    accessibilityLabel="Password"
+                    autoCapitalize="none"
+                    autoComplete="current-password"
+                    editable={!isSubmitting}
+                    onChangeText={setPassword}
+                    placeholder="Enter password"
+                    placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                    secureTextEntry
+                    style={styles.registrationInput}
+                    value={password}
+                  />
+                </View>
+              </View>
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                hitSlop={8}
+                onPress={handleLoginPasswordReset}
+                style={styles.loginForgotButton}
+              >
+                <Text style={styles.loginForgotLabel}>Forget Password!</Text>
+              </Pressable>
+
+              {errorMessage ? (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  style={styles.loginErrorText}
+                >
+                  {errorMessage}
+                </Text>
+              ) : null}
+              {successMessage ? (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  style={styles.loginSuccessText}
+                >
+                  {successMessage}
+                </Text>
+              ) : null}
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                onPress={submitLogin}
+                style={({ pressed }) => [
+                  styles.loginPrimaryButton,
+                  pressed && styles.buttonPressed,
+                  isSubmitting && styles.buttonDisabled,
+                ]}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.registrationPrimaryButtonText}>Login</Text>
+                )}
+              </Pressable>
+
+              <View style={styles.loginDividerRow}>
+                <View style={styles.registrationDivider} />
+                <Text style={styles.registrationDividerLabel}>
+                  CONTINUE WITH
+                </Text>
+                <View style={styles.registrationDivider} />
+              </View>
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                onPress={showGooglePendingMessage}
+                style={({ pressed }) => [
+                  styles.registrationAlternativeButton,
+                  styles.loginGoogleButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Image
+                  accessible={false}
+                  resizeMode="contain"
+                  source={registrationAssets.google}
+                  style={styles.registrationGoogleIcon}
+                />
+                <Text style={styles.registrationAlternativeLabel}>GOOGLE</Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                onPress={() =>
+                  changeLoginMethod(loginMethod === 'phone' ? 'email' : 'phone')
+                }
+                style={({ pressed }) => [
+                  styles.registrationAlternativeButton,
+                  styles.loginEmailButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Image
+                  accessible={false}
+                  resizeMode="contain"
+                  source={registrationAssets.mail}
+                  style={styles.registrationMailIcon}
+                />
+                <Text style={styles.registrationAlternativeLabel}>
+                  {loginMethod === 'phone'
+                    ? 'LOGIN WITH EMAIL'
+                    : 'LOGIN WITH PHONE'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              autoCapitalize="none"
-              autoComplete="email"
-              editable={!isSubmitting}
-              inputMode="email"
-              keyboardType="email-address"
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              placeholderTextColor="#737373"
-              style={styles.input}
-              value={email}
-            />
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              autoCapitalize="none"
-              autoComplete="current-password"
-              editable={!isSubmitting}
-              onChangeText={setPassword}
-              placeholder="At least 6 characters"
-              placeholderTextColor="#737373"
-              secureTextEntry
-              style={styles.input}
-              value={password}
-            />
-          </View>
-
-          {errorMessage ? (
-            <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              {errorMessage}
-            </Text>
-          ) : null}
-          {successMessage ? (
-            <Text accessibilityLiveRegion="polite" style={styles.successText}>
-              {successMessage}
-            </Text>
-          ) : null}
-
-          <Pressable
-            accessibilityRole="button"
-            disabled={isSubmitting}
-            onPress={submit}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.buttonPressed,
-              isSubmitting && styles.buttonDisabled,
-            ]}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.primaryButtonText}>Login</Text>
-            )}
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            disabled={isSubmitting}
-            hitSlop={8}
-            onPress={resetPassword}
-            style={styles.textButton}
-          >
-            <Text style={styles.textButtonLabel}>Forgot password?</Text>
-          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -618,6 +754,113 @@ const styles = StyleSheet.create({
   registrationScreen: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  loginScreen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  loginScrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loginCanvas: {
+    width: '100%',
+    maxWidth: 402,
+    minHeight: 874,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+  loginArtContainer: {
+    position: 'absolute',
+    left: 66,
+    top: -184,
+    width: 511,
+    height: 508,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginArt: {
+    width: 390,
+    height: 395,
+    transform: [{ rotate: '111.63deg' }],
+  },
+  loginContent: {
+    paddingTop: 160,
+    paddingBottom: 48,
+    paddingHorizontal: 40,
+  },
+  loginHeading: {
+    color: '#000000',
+    fontSize: 40,
+    lineHeight: 47,
+    fontWeight: '700',
+  },
+  loginAccountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 1,
+  },
+  loginAccountText: {
+    color: '#000000',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  loginRegisterLink: {
+    color: '#FF2010',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  loginFields: {
+    gap: 22,
+    marginTop: 20,
+  },
+  loginForgotButton: {
+    minHeight: 44,
+    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    marginLeft: 9,
+    marginTop: 6,
+  },
+  loginForgotLabel: {
+    color: '#071B87',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '700',
+  },
+  loginErrorText: {
+    color: '#B91C1C',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  loginSuccessText: {
+    color: '#166534',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  loginPrimaryButton: {
+    height: 61,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 25,
+    backgroundColor: '#FF5A27',
+    marginTop: 21,
+  },
+  loginDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 38,
+  },
+  loginGoogleButton: {
+    marginTop: 19,
+  },
+  loginEmailButton: {
+    marginTop: 26,
   },
   registrationScrollContent: {
     flexGrow: 1,
