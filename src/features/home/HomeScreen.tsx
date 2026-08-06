@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -111,6 +112,11 @@ function SectionHeader({
 
 export function HomeScreen({ displayName }: { displayName?: string | null }) {
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
+  const { width: screenWidth } = useWindowDimensions();
+  const promoWidth = Math.max(screenWidth - 28, 0);
+  const promoHeight = promoWidth * (384 / 790);
+  const productWidth = Math.min(156, (screenWidth - 42) / 2);
+  const productHeight = productWidth * (550 / 376);
 
   return (
     <ScrollView
@@ -145,12 +151,14 @@ export function HomeScreen({ displayName }: { displayName?: string | null }) {
         </Pressable>
       </View>
 
-      <Image
-        accessibilityLabel="Complete Guyman food deal advertisement"
-        resizeMode="contain"
-        source={homeAssets.promo}
-        style={styles.promo}
-      />
+      <View style={styles.promoFrame}>
+        <Image
+          accessibilityLabel="Complete Guyman food deal advertisement"
+          resizeMode="contain"
+          source={homeAssets.promo}
+          style={[styles.promo, { width: promoWidth, height: promoHeight }]}
+        />
+      </View>
 
       <Text style={styles.listingsTitle}>Listings</Text>
       <ScrollView
@@ -174,7 +182,7 @@ export function HomeScreen({ displayName }: { displayName?: string | null }) {
             accessibilityLabel="White sneakers listing"
             resizeMode="contain"
             source={homeAssets.sneakers}
-            style={styles.productCard}
+            style={[styles.productCard, { width: productWidth, height: productHeight }]}
           />
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => undefined}>
@@ -182,7 +190,7 @@ export function HomeScreen({ displayName }: { displayName?: string | null }) {
             accessibilityLabel="Black watch listing"
             resizeMode="contain"
             source={homeAssets.watch}
-            style={styles.productCard}
+            style={[styles.productCard, { width: productWidth, height: productHeight }]}
           />
         </Pressable>
       </ScrollView>
@@ -203,29 +211,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    height: 74,
+    height: 64,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 42,
+    height: 42,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#FF5A27',
-    borderRadius: 25,
+    borderRadius: 21,
     backgroundColor: '#5D5859',
   },
   avatarText: {
     color: '#FFFFFF',
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 24,
+    lineHeight: 29,
     fontWeight: '400',
   },
   searchButton: {
-    height: 43,
+    height: 40,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,13 +241,13 @@ const styles = StyleSheet.create({
     borderColor: '#D0D0D0',
     borderRadius: 22,
     backgroundColor: '#FAFAFA',
-    marginLeft: 12,
-    paddingHorizontal: 18,
+    marginLeft: 10,
+    paddingHorizontal: 14,
   },
   searchIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 12,
+    width: 21,
+    height: 21,
+    marginRight: 9,
   },
   searchIconCircle: {
     position: 'absolute',
@@ -264,11 +272,11 @@ const styles = StyleSheet.create({
   searchPlaceholder: {
     flex: 1,
     color: '#8F8F8F',
-    fontSize: 17,
+    fontSize: 15,
   },
   notificationButton: {
-    width: 42,
-    height: 48,
+    width: 34,
+    height: 42,
     alignItems: 'flex-end',
     justifyContent: 'center',
     marginLeft: 8,
@@ -306,26 +314,30 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#333333',
   },
+  promoFrame: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
   promo: {
-    width: '100%',
-    aspectRatio: 790 / 384,
+    maxWidth: '100%',
   },
   listingsTitle: {
     color: '#000000',
-    fontSize: 29,
-    lineHeight: 35,
+    fontSize: 23,
+    lineHeight: 29,
     fontWeight: '700',
-    marginTop: 25,
-    marginLeft: 20,
+    marginTop: 18,
+    marginLeft: 16,
   },
   categoryRow: {
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   categoryCard: {
-    width: 110,
-    height: 53,
+    width: 100,
+    height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -338,13 +350,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   categoryIconBox: {
-    width: 28,
-    height: 28,
-    marginRight: 8,
+    width: 24,
+    height: 24,
+    marginRight: 6,
   },
   categoryLabel: {
     color: '#000000',
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
   },
   foodLine: {
@@ -408,8 +420,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 21,
-    paddingHorizontal: 24,
+    marginTop: 17,
+    paddingHorizontal: 16,
   },
   sectionTitleRow: {
     flexDirection: 'row',
@@ -418,30 +430,29 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#000000',
-    fontSize: 25,
-    lineHeight: 32,
+    fontSize: 20,
+    lineHeight: 27,
     fontWeight: '700',
   },
   sectionSuffix: {
     color: '#FF5A27',
-    fontSize: 25,
-    lineHeight: 32,
+    fontSize: 20,
+    lineHeight: 27,
     marginLeft: 5,
   },
   viewAll: {
     color: '#FF5A27',
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 20,
     fontWeight: '700',
   },
   productRow: {
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingTop: 17,
+    gap: 8,
+    paddingHorizontal: 13,
+    paddingTop: 12,
   },
   productCard: {
-    width: 180,
-    height: 263,
+    resizeMode: 'contain',
   },
   nearbyPlaceholder: {
     height: 110,
