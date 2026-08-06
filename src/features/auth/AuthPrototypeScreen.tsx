@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -23,6 +24,15 @@ import {
 } from './auth-service';
 
 type AuthMode = 'login' | 'register';
+type RegistrationMethod = 'phone' | 'email';
+
+const registrationAssets = {
+  background: require('../../../assets/auth/ellipse.svg.png'),
+  google: require('../../../assets/auth/google-mark.png'),
+  lock: require('../../../assets/auth/lock-line.svg.png'),
+  mail: require('../../../assets/auth/mail-line.svg.png'),
+  user: require('../../../assets/auth/user-3-line.svg.png'),
+};
 
 function getAuthErrorMessage(error: unknown) {
   if (!(error instanceof FirebaseError)) {
@@ -53,7 +63,10 @@ export function AuthPrototypeScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [mode, setMode] = useState<AuthMode>('login');
+  const [registrationMethod, setRegistrationMethod] =
+    useState<RegistrationMethod>('phone');
   const [displayName, setDisplayName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -70,10 +83,60 @@ export function AuthPrototypeScreen() {
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
+    if (nextMode === 'register') {
+      setRegistrationMethod('phone');
+    }
     setErrorMessage(null);
     setSuccessMessage(null);
     setPassword('');
     setConfirmPassword('');
+  }
+
+  function changeRegistrationMethod(nextMethod: RegistrationMethod) {
+    setRegistrationMethod(nextMethod);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  }
+
+  function showGooglePendingMessage() {
+    setSuccessMessage(null);
+    setErrorMessage(
+      'Google sign-in will be available after the company OAuth setup is complete.',
+    );
+  }
+
+  async function submitRegistration() {
+    if (registrationMethod === 'email') {
+      await submit();
+      return;
+    }
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (!displayName.trim()) {
+      setErrorMessage('Enter your name.');
+      return;
+    }
+
+    if (phoneNumber.replace(/\D/g, '').length < 9) {
+      setErrorMessage('Enter a valid Ghana phone number.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Use a password with at least six characters.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage('The passwords do not match.');
+      return;
+    }
+
+    setErrorMessage(
+      'Phone registration is not enabled in Firebase yet. Use Register with Email below for now.',
+    );
   }
 
   async function submit() {
@@ -198,6 +261,236 @@ export function AuthPrototypeScreen() {
     );
   }
 
+  if (mode === 'register') {
+    return (
+      <SafeAreaView style={styles.registrationScreen}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.flex}
+        >
+          <ScrollView
+            contentContainerStyle={styles.registrationScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.registrationCanvas}>
+              <View pointerEvents="none" style={styles.registrationArtContainer}>
+                <Image
+                  resizeMode="contain"
+                  source={registrationAssets.background}
+                  style={styles.registrationArt}
+                />
+              </View>
+
+              <View style={styles.registrationContent}>
+                <Text style={styles.registrationHeading}>Register</Text>
+                <View style={styles.registrationAccountRow}>
+                  <Text style={styles.registrationAccountText}>
+                    Already have an account?
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    hitSlop={8}
+                    onPress={() => changeMode('login')}
+                  >
+                    <Text style={styles.registrationLoginLink}>Login</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.registrationFields}>
+                  <View style={styles.registrationInputShell}>
+                    <Image
+                      resizeMode="contain"
+                      source={registrationAssets.user}
+                      style={styles.registrationFieldIcon}
+                    />
+                    <TextInput
+                      autoCapitalize="words"
+                      autoComplete="name"
+                      editable={!isSubmitting}
+                      onChangeText={setDisplayName}
+                      placeholder="Enter your name"
+                      placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                      style={styles.registrationInput}
+                      value={displayName}
+                    />
+                  </View>
+
+                  <View style={styles.registrationInputShell}>
+                    {registrationMethod === 'phone' ? (
+                      <Text style={styles.registrationPhonePrefix}>+233</Text>
+                    ) : (
+                      <Image
+                        resizeMode="contain"
+                        source={registrationAssets.mail}
+                        style={styles.registrationFieldIcon}
+                      />
+                    )}
+                    <TextInput
+                      autoCapitalize="none"
+                      autoComplete={
+                        registrationMethod === 'phone' ? 'tel' : 'email'
+                      }
+                      editable={!isSubmitting}
+                      inputMode={
+                        registrationMethod === 'phone' ? 'tel' : 'email'
+                      }
+                      keyboardType={
+                        registrationMethod === 'phone'
+                          ? 'phone-pad'
+                          : 'email-address'
+                      }
+                      onChangeText={
+                        registrationMethod === 'phone'
+                          ? setPhoneNumber
+                          : setEmail
+                      }
+                      placeholder={
+                        registrationMethod === 'phone'
+                          ? 'Enter Phone Number'
+                          : 'Enter Email Address'
+                      }
+                      placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                      style={styles.registrationInput}
+                      value={
+                        registrationMethod === 'phone' ? phoneNumber : email
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.registrationInputShell}>
+                    <Image
+                      resizeMode="contain"
+                      source={registrationAssets.lock}
+                      style={styles.registrationFieldIconMuted}
+                    />
+                    <TextInput
+                      autoCapitalize="none"
+                      autoComplete="new-password"
+                      editable={!isSubmitting}
+                      onChangeText={setPassword}
+                      placeholder="Enter password"
+                      placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                      secureTextEntry
+                      style={styles.registrationInput}
+                      value={password}
+                    />
+                  </View>
+
+                  <View style={styles.registrationInputShell}>
+                    <Image
+                      resizeMode="contain"
+                      source={registrationAssets.lock}
+                      style={styles.registrationFieldIconMuted}
+                    />
+                    <TextInput
+                      autoCapitalize="none"
+                      autoComplete="new-password"
+                      editable={!isSubmitting}
+                      onChangeText={setConfirmPassword}
+                      placeholder="Confirm password"
+                      placeholderTextColor="rgba(0, 0, 0, 0.25)"
+                      secureTextEntry
+                      style={styles.registrationInput}
+                      value={confirmPassword}
+                    />
+                  </View>
+                </View>
+
+                {errorMessage ? (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={styles.registrationErrorText}
+                  >
+                    {errorMessage}
+                  </Text>
+                ) : null}
+                {successMessage ? (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    style={styles.registrationSuccessText}
+                  >
+                    {successMessage}
+                  </Text>
+                ) : null}
+
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={isSubmitting}
+                  onPress={submitRegistration}
+                  style={({ pressed }) => [
+                    styles.registrationPrimaryButton,
+                    pressed && styles.buttonPressed,
+                    isSubmitting && styles.buttonDisabled,
+                  ]}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.registrationPrimaryButtonText}>
+                      Register
+                    </Text>
+                  )}
+                </Pressable>
+
+                <View style={styles.registrationDividerRow}>
+                  <View style={styles.registrationDivider} />
+                  <Text style={styles.registrationDividerLabel}>
+                    CONTINUE WITH
+                  </Text>
+                  <View style={styles.registrationDivider} />
+                </View>
+
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={showGooglePendingMessage}
+                  style={({ pressed }) => [
+                    styles.registrationAlternativeButton,
+                    pressed && styles.buttonPressed,
+                  ]}
+                >
+                  <Image
+                    resizeMode="contain"
+                    source={registrationAssets.google}
+                    style={styles.registrationGoogleIcon}
+                  />
+                  <Text style={styles.registrationAlternativeLabel}>
+                    GOOGLE
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() =>
+                    changeRegistrationMethod(
+                      registrationMethod === 'phone' ? 'email' : 'phone',
+                    )
+                  }
+                  style={({ pressed }) => [
+                    styles.registrationAlternativeButton,
+                    styles.registrationEmailButton,
+                    pressed && styles.buttonPressed,
+                  ]}
+                >
+                  <Image
+                    resizeMode="contain"
+                    source={registrationAssets.mail}
+                    style={styles.registrationMailIcon}
+                  />
+                  <Text style={styles.registrationAlternativeLabel}>
+                    {registrationMethod === 'phone'
+                      ? 'REGISTER WITH EMAIL'
+                      : 'REGISTER WITH PHONE'}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <KeyboardAvoidingView
@@ -209,69 +502,31 @@ export function AuthPrototypeScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.brand}>Shopicom</Text>
-          <Text style={styles.heading}>
-            {mode === 'login' ? 'Login' : 'Create account'}
-          </Text>
+          <Text style={styles.heading}>Login</Text>
           <Text style={styles.supportingText}>
-            {mode === 'login'
-              ? 'Sign in with your development account.'
-              : 'Register a development account.'}
+            Sign in with your development account.
           </Text>
 
           <View accessibilityRole="tablist" style={styles.modeControl}>
             <Pressable
               accessibilityRole="tab"
-              accessibilityState={{ selected: mode === 'login' }}
+              accessibilityState={{ selected: true }}
               onPress={() => changeMode('login')}
-              style={[
-                styles.modeButton,
-                mode === 'login' && styles.modeButtonSelected,
-              ]}
+              style={[styles.modeButton, styles.modeButtonSelected]}
             >
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  mode === 'login' && styles.modeButtonTextSelected,
-                ]}
-              >
+              <Text style={[styles.modeButtonText, styles.modeButtonTextSelected]}>
                 Login
               </Text>
             </Pressable>
             <Pressable
               accessibilityRole="tab"
-              accessibilityState={{ selected: mode === 'register' }}
+              accessibilityState={{ selected: false }}
               onPress={() => changeMode('register')}
-              style={[
-                styles.modeButton,
-                mode === 'register' && styles.modeButtonSelected,
-              ]}
+              style={styles.modeButton}
             >
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  mode === 'register' && styles.modeButtonTextSelected,
-                ]}
-              >
-                Register
-              </Text>
+              <Text style={styles.modeButtonText}>Register</Text>
             </Pressable>
           </View>
-
-          {mode === 'register' ? (
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Name</Text>
-              <TextInput
-                autoCapitalize="words"
-                autoComplete="name"
-                editable={!isSubmitting}
-                onChangeText={setDisplayName}
-                placeholder="Your name"
-                placeholderTextColor="#737373"
-                style={styles.input}
-                value={displayName}
-              />
-            </View>
-          ) : null}
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
@@ -293,7 +548,7 @@ export function AuthPrototypeScreen() {
             <Text style={styles.label}>Password</Text>
             <TextInput
               autoCapitalize="none"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete="current-password"
               editable={!isSubmitting}
               onChangeText={setPassword}
               placeholder="At least 6 characters"
@@ -303,23 +558,6 @@ export function AuthPrototypeScreen() {
               value={password}
             />
           </View>
-
-          {mode === 'register' ? (
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Confirm password</Text>
-              <TextInput
-                autoCapitalize="none"
-                autoComplete="new-password"
-                editable={!isSubmitting}
-                onChangeText={setConfirmPassword}
-                placeholder="Repeat your password"
-                placeholderTextColor="#737373"
-                secureTextEntry
-                style={styles.input}
-                value={confirmPassword}
-              />
-            </View>
-          ) : null}
 
           {errorMessage ? (
             <Text accessibilityLiveRegion="polite" style={styles.errorText}>
@@ -345,23 +583,19 @@ export function AuthPrototypeScreen() {
             {isSubmitting ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.primaryButtonText}>
-                {mode === 'login' ? 'Login' : 'Register'}
-              </Text>
+              <Text style={styles.primaryButtonText}>Login</Text>
             )}
           </Pressable>
 
-          {mode === 'login' ? (
-            <Pressable
-              accessibilityRole="button"
-              disabled={isSubmitting}
-              hitSlop={8}
-              onPress={resetPassword}
-              style={styles.textButton}
-            >
-              <Text style={styles.textButtonLabel}>Forgot password?</Text>
-            </Pressable>
-          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            disabled={isSubmitting}
+            hitSlop={8}
+            onPress={resetPassword}
+            style={styles.textButton}
+          >
+            <Text style={styles.textButtonLabel}>Forgot password?</Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -375,6 +609,184 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#F7F7F7',
+  },
+  registrationScreen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  registrationScrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  registrationCanvas: {
+    width: '100%',
+    maxWidth: 402,
+    minHeight: 874,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+  registrationArtContainer: {
+    position: 'absolute',
+    left: 66,
+    top: -184,
+    width: 511,
+    height: 508,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  registrationArt: {
+    width: 390,
+    height: 395,
+    transform: [{ rotate: '111.63deg' }],
+  },
+  registrationContent: {
+    paddingTop: 78,
+    paddingBottom: 48,
+    paddingHorizontal: 40,
+  },
+  registrationHeading: {
+    color: '#000000',
+    fontSize: 40,
+    lineHeight: 47,
+    fontWeight: '700',
+  },
+  registrationAccountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 1,
+  },
+  registrationAccountText: {
+    color: '#000000',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  registrationLoginLink: {
+    color: '#FF2010',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  registrationFields: {
+    gap: 28,
+    marginTop: 27,
+  },
+  registrationInputShell: {
+    height: 61,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 25,
+    backgroundColor: '#FFFFFF',
+    paddingLeft: 24,
+    paddingRight: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0.4, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  registrationFieldIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 24,
+  },
+  registrationFieldIconMuted: {
+    width: 24,
+    height: 24,
+    marginRight: 24,
+    opacity: 0.5,
+  },
+  registrationPhonePrefix: {
+    width: 41,
+    color: '#000000',
+    fontSize: 18,
+    lineHeight: 27,
+    fontWeight: '500',
+    marginLeft: -6,
+    marginRight: 10,
+  },
+  registrationInput: {
+    flex: 1,
+    height: '100%',
+    color: '#000000',
+    fontSize: 18,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
+  registrationErrorText: {
+    color: '#B91C1C',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 18,
+  },
+  registrationSuccessText: {
+    color: '#166534',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 18,
+  },
+  registrationPrimaryButton: {
+    height: 61,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 25,
+    backgroundColor: '#FF5A27',
+    marginTop: 56,
+  },
+  registrationPrimaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    lineHeight: 29,
+    fontWeight: '500',
+  },
+  registrationDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 28,
+  },
+  registrationDivider: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  registrationDividerLabel: {
+    color: '#641B04',
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '700',
+    marginHorizontal: 7,
+  },
+  registrationAlternativeButton: {
+    height: 51,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    marginTop: 19,
+  },
+  registrationEmailButton: {
+    marginTop: 26,
+  },
+  registrationGoogleIcon: {
+    width: 32,
+    height: 30,
+    marginRight: 14,
+  },
+  registrationMailIcon: {
+    width: 24,
+    height: 20,
+    marginRight: 9,
+  },
+  registrationAlternativeLabel: {
+    color: '#640E08',
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: '800',
+    letterSpacing: 1.2,
   },
   loadingScreen: {
     flex: 1,
