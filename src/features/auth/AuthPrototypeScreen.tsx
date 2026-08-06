@@ -22,6 +22,7 @@ import {
   signOutCurrentUser,
   subscribeToAuthSession,
 } from './auth-service';
+import { AuthenticatedApp } from '../app/AuthenticatedApp';
 
 type AuthMode = 'login' | 'register';
 type LoginMethod = 'phone' | 'email';
@@ -269,39 +270,12 @@ export function AuthPrototypeScreen() {
 
   if (user) {
     return (
-      <SafeAreaView style={styles.screen}>
-        <View style={styles.sessionContent}>
-          <Text style={styles.brand}>Shopicom</Text>
-          <Text style={styles.sessionTitle}>
-            Welcome{user.displayName ? `, ${user.displayName}` : ''}
-          </Text>
-          <Text style={styles.sessionEmail}>{user.email}</Text>
-          <Text style={styles.sessionStatus}>Your session is active.</Text>
-
-          {errorMessage ? (
-            <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              {errorMessage}
-            </Text>
-          ) : null}
-
-          <Pressable
-            accessibilityRole="button"
-            disabled={isSubmitting}
-            onPress={logout}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.buttonPressed,
-              isSubmitting && styles.buttonDisabled,
-            ]}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.primaryButtonText}>Log out</Text>
-            )}
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <AuthenticatedApp
+        errorMessage={errorMessage}
+        isSubmitting={isSubmitting}
+        onLogout={logout}
+        user={user}
+      />
     );
   }
 
