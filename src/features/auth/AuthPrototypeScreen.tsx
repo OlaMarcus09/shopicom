@@ -318,7 +318,12 @@ export function AuthPrototypeScreen() {
 
                   <View style={styles.registrationInputShell}>
                     {registrationMethod === 'phone' ? (
-                      <Text style={styles.registrationPhonePrefix}>+233</Text>
+                      <Text
+                        numberOfLines={1}
+                        style={styles.registrationPhonePrefix}
+                      >
+                        +233
+                      </Text>
                     ) : (
                       <Image
                         resizeMode="contain"
@@ -698,13 +703,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   registrationPhonePrefix: {
-    width: 41,
+    width: 49,
     color: '#000000',
     fontSize: 18,
     lineHeight: 27,
     fontWeight: '500',
+    flexShrink: 0,
     marginLeft: -6,
-    marginRight: 10,
+    marginRight: 2,
   },
   registrationInput: {
     flex: 1,
