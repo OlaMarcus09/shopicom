@@ -1,0 +1,11 @@
+const { expo } = require('./app.json');
+
+module.exports = {
+  ...expo,
+  android: {
+    ...expo.android,
+    googleServicesFile:
+      process.env.GOOGLE_SERVICES_FILE ??
+      './.firebase/google-services.dev.json',
+  },
+};
