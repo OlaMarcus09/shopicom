@@ -1,0 +1,102 @@
+// Generated Figma inspection reference. Do not import into production code.
+const imgDownload1 = "https://www.figma.com/api/mcp/asset/335543d9-d1f6-4278-bd55-d4c25e8d8672.png";
+const imgEllipse1 = "https://www.figma.com/api/mcp/asset/2aa5df6d-9ee5-489d-b8a6-4e2c8d1b69ab.svg";
+const imgLockLine = "https://www.figma.com/api/mcp/asset/5ce28e38-6ea4-43bb-92fa-e5a224d34c4e.svg";
+const imgUser3Line = "https://www.figma.com/api/mcp/asset/84091f51-f970-48eb-9a1e-7ca995e00aba.svg";
+const imgMailLine = "https://www.figma.com/api/mcp/asset/f03a9510-2f4e-4400-84c0-7c24efe41608.svg";
+
+export default function Register() {
+  return (
+    <div className="bg-white relative size-full" data-node-id="331:45" data-name="register">
+      <div className="absolute flex h-[508.122px] items-center justify-center left-[66.02px] top-[-183.93px] w-[510.928px]" data-node-id="331:46">
+        <div className="flex-none rotate-[111.63deg]">
+          <div className="h-[395px] relative w-[390px]">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgEllipse1} />
+          </div>
+        </div>
+      </div>
+      <div className="[word-break:break-word] absolute contents leading-[normal] left-[34px] top-[86px]" data-node-id="331:47" data-name="log in">
+        <p className="absolute font-['Roboto:Bold'] font-bold h-[42px] left-[34px] text-[40px] text-black top-[86px] w-[177px]" data-node-id="331:48" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Register
+        </p>
+        <p className="absolute font-['Roboto:Regular'] font-normal left-[35px] text-[15px] text-black top-[139px] whitespace-nowrap" data-node-id="331:49" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Already have an account?
+        </p>
+        <p className="absolute font-['Roboto:SemiBold'] font-semibold left-[215px] text-[#ff2010] text-[15px] top-[139px] whitespace-nowrap" data-node-id="331:50" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Login
+        </p>
+      </div>
+      <div className="absolute contents left-[41px] top-[566px]" data-node-id="331:51" data-name="login">
+        <div className="absolute bg-[#ff5a27] h-[61px] left-[41px] rounded-[25px] top-[566px] w-[321px]" data-node-id="331:52" />
+        <p className="[word-break:break-word] absolute font-['Roboto:Medium'] font-medium h-[22.086px] leading-[normal] left-[159px] text-[24px] text-white top-[583.83px] w-[96px]" data-node-id="331:53" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Register
+        </p>
+      </div>
+      <div className="absolute contents left-[41px] top-[356px]" data-node-id="331:54" data-name="pasword">
+        <div className="absolute bg-white h-[60px] left-[41px] rounded-[25px] shadow-[0.4px_1px_4px_1px_rgba(0,0,0,0.08)] top-[356px] w-[321px]" data-node-id="331:55" />
+        <p className="[word-break:break-word] absolute font-['Roboto:Regular'] font-normal h-[24.652px] leading-[normal] left-[114px] opacity-25 text-[18px] text-black top-[375.26px] w-[125px]" data-node-id="331:56" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Enter password
+        </p>
+        <div className="absolute h-[28.174px] left-[66px] opacity-50 overflow-clip top-[375.26px] w-[24px]" data-node-id="331:57" data-name="user-3-line">
+          <div className="absolute left-0 size-[24px] top-0" data-node-id="331:58" data-name="lock-line">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLockLine} />
+          </div>
+        </div>
+      </div>
+      <div className="absolute contents left-[41px] top-[449px]" data-node-id="331:84" data-name="confirm pasword">
+        <div className="absolute bg-white h-[60px] left-[41px] rounded-[25px] shadow-[0.4px_1px_4px_1px_rgba(0,0,0,0.08)] top-[449px] w-[321px]" data-node-id="331:85" />
+        <p className="[word-break:break-word] absolute font-['Roboto:Regular'] font-normal h-[25px] leading-[normal] left-[114px] opacity-25 text-[18px] text-black top-[468px] w-[162px]" data-node-id="331:86" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Confirm password
+        </p>
+        <div className="absolute h-[28.174px] left-[66px] opacity-50 overflow-clip top-[468.26px] w-[24px]" data-node-id="331:87" data-name="user-3-line">
+          <div className="absolute left-0 size-[24px] top-0" data-node-id="331:88" data-name="lock-line">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLockLine} />
+          </div>
+        </div>
+      </div>
+      <div className="absolute contents left-[41px] top-[185px]" data-node-id="331:78" data-name="name">
+        <div className="absolute bg-white h-[60px] left-[41px] rounded-[25px] shadow-[0.4px_1px_4px_1px_rgba(0,0,0,0.08)] top-[185px] w-[321px]" data-node-id="331:79" />
+        <p className="[word-break:break-word] absolute font-['Roboto:Regular'] font-normal h-[24.652px] leading-[normal] left-[114px] opacity-25 text-[18px] text-black top-[204.26px] w-[125px]" data-node-id="331:80" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Enter password
+        </p>
+        <div className="absolute left-[66px] size-[24px] top-[203px]" data-node-id="331:90" data-name="user-3-line">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgUser3Line} />
+        </div>
+      </div>
+      <div className="absolute contents left-[41px] top-[266px]" data-node-id="331:60" data-name="phone">
+        <div className="absolute bg-white h-[63px] left-[41px] rounded-[25px] shadow-[0.4px_1px_4px_1px_rgba(0,0,0,0.08)] top-[266px] w-[321px]" data-node-id="331:61" />
+        <p className="[word-break:break-word] absolute font-['Roboto:Regular'] font-normal h-[27.109px] leading-[normal] left-[110px] opacity-25 text-[18px] text-black top-[286.78px] w-[166px]" data-node-id="331:62" style={{ fontVariationSettings: '"wdth" 100' }}>
+          Enter Phone Number
+        </p>
+        <p className="[word-break:break-word] absolute font-['Roboto:Medium'] font-medium h-[27.109px] leading-[normal] left-[59px] text-[18px] text-black top-[288.07px] w-[41px]" data-node-id="331:63" style={{ fontVariationSettings: '"wdth" 100' }}>
+          +233
+        </p>
+      </div>
+      <div className="absolute contents left-[41px] top-[655px]" data-node-id="331:64" data-name="google sign in">
+        <div className="absolute bg-[#d9d9d9] h-px left-[41px] top-[665px] w-[317px]" data-node-id="331:65" />
+        <div className="absolute bg-white h-[24px] left-[135px] top-[655px] w-[116px]" data-node-id="331:66" />
+        <p className="[word-break:break-word] absolute font-['Poppins:Bold'] leading-[normal] left-[141px] not-italic opacity-90 text-[#641b04] text-[13px] top-[657px] whitespace-nowrap" data-node-id="331:67">
+          CONTINUE WITH
+        </p>
+        <div className="absolute contents left-[41px] top-[697px]" data-node-id="331:68">
+          <div className="absolute bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid h-[51px] left-[41px] rounded-[20px] top-[697px] w-[317px]" data-node-id="331:69" />
+          <p className="[word-break:break-word] absolute font-['Roboto:ExtraBold'] font-extrabold leading-[normal] left-[182px] text-[#640e08] text-[12px] top-[717px] tracking-[1.2px] whitespace-nowrap" data-node-id="331:70" style={{ fontVariationSettings: '"wdth" 100' }}>
+            GOOGLE
+          </p>
+        </div>
+        <div className="absolute contents left-[41px] top-[775px]" data-node-id="331:71">
+          <div className="absolute bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid h-[51px] left-[41px] rounded-[20px] top-[775px] w-[317px]" data-node-id="331:72" />
+          <p className="[word-break:break-word] absolute font-['Roboto:ExtraBold'] font-extrabold leading-[normal] left-[169px] text-[#640e08] text-[12px] top-[796px] tracking-[1.2px] whitespace-nowrap" data-node-id="331:73" style={{ fontVariationSettings: '"wdth" 100' }}>
+            LOGIN WITH EMAIL
+          </p>
+          <div className="absolute h-[20px] left-[136px] top-[793px] w-[24px]" data-node-id="331:74" data-name="mail-line">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgMailLine} />
+          </div>
+        </div>
+        <div className="absolute h-[30px] left-[136px] top-[709px] w-[32px]" data-node-id="331:76" data-name="download 1">
+          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgDownload1} />
+        </div>
+      </div>
+    </div>
+  );
+}
