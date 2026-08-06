@@ -2,6 +2,7 @@
   "expo": {
     "name": "Shopicom",
     "slug": "shopicom-mobile",
+    "owner": "shopicmltd",
     "scheme": "shopicom",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,6 +23,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9818c412-cc4e-465e-8551-e6685db48399"
+      }
     }
   }
 }
