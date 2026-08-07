@@ -1,7 +1,7 @@
 # Shopicom Mobile — Session Handoff
 
 **Updated:** 2026-08-06  
-**Current milestone:** Core Figma frontend screens approved on Android; Firebase marketplace data integration is next.  
+**Current milestone:** Core Figma frontend screens approved on Android; Firestore listing foundation deployed; Storage awaits founder billing approval.  
 **Working preference:** Complete and report one bounded step before moving to the next.
 
 ## Project configuration
@@ -31,11 +31,21 @@
 - Hot Selling two-column product grid implemented and approved.
 - Vendor Storefront implemented with responsive listings and approved.
 - Figma-style Profile screen implemented with account sections and approved.
+- Modern floating bottom navigation implemented and approved.
 - All 11 saved Figma screen exports are in `docs/figma/screens/`.
 
 ## Mobile sizing standard
 
 The founder approved the compact Inbox scale as the standard for all remaining screens. Keep headings, controls, list rows, icons, and vertical spacing restrained. Avoid transferring oversized Figma-export dimensions directly to the phone UI. Existing Home, Categories, and Create Listing screens have already been compacted.
+
+## Firebase marketplace progress
+
+- Firestore listing model and services added in `src/features/listings/`.
+- Firestore security rules and active-listing index deployed successfully to `shopicom-limited-dev`.
+- Expo Image Picker installed.
+- Create Listing now supports selecting up to 10 photos, previewing them, uploading them to Storage, and saving the listing to Firestore.
+- Storage rules are written locally in `storage.rules`, but Storage cannot be deployed until Firebase Storage is created.
+- Firebase Console currently requires the project to upgrade to the Blaze pay-as-you-go plan before Storage can be enabled. Do not upgrade without founder approval.
 
 ## Categories implementation
 
@@ -54,8 +64,10 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 
 1. Start Metro with:
    `EXPO_NO_TELEMETRY=1 npm run start -- --dev-client --lan --port 8097`
-2. Begin the marketplace data phase, starting with Firestore listing data and Firebase Storage image uploads.
-3. Keep sample fallback data until the first Firestore read/write is verified.
+2. If the founder approves Blaze, enable Storage at the Firebase Console, choose `europe-west1 (Belgium)`, then deploy `storage.rules`.
+3. Rebuild the Android development APK because `expo-image-picker` adds a native module.
+4. Test posting a listing with one image, then verify it appears in Firestore/Storage.
+5. If billing is not approved, keep using local sample images and continue non-upload marketplace work.
 
 ## Pending product work
 
