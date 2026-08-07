@@ -1,7 +1,7 @@
 # Shopicom Mobile — Session Handoff
 
 **Updated:** 2026-08-06  
-**Current milestone:** Home, Categories, Create Listing, and Inbox screens approved on Android.  
+**Current milestone:** Core Figma frontend screens approved on Android; Firebase marketplace data integration is next.  
 **Working preference:** Complete and report one bounded step before moving to the next.
 
 ## Project configuration
@@ -26,6 +26,11 @@
 - Categories sidebar correction and six-tile grid verified on Android.
 - Compact Create Listing form implemented and approved.
 - Compact Inbox/Messages screen implemented and approved.
+- Chat screen implemented with keyboard-aware composer and approved.
+- Listing Details flow implemented with product, vendor, delivery, and review sections and approved.
+- Hot Selling two-column product grid implemented and approved.
+- Vendor Storefront implemented with responsive listings and approved.
+- Figma-style Profile screen implemented with account sections and approved.
 - All 11 saved Figma screen exports are in `docs/figma/screens/`.
 
 ## Mobile sizing standard
@@ -49,16 +54,14 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 
 1. Start Metro with:
    `EXPO_NO_TELEMETRY=1 npm run start -- --dev-client --lan --port 8097`
-2. Open the installed Shopicom app on the Android phone.
-3. Continue with the next saved Figma screen using the approved compact sizing standard.
+2. Begin the marketplace data phase, starting with Firestore listing data and Firebase Storage image uploads.
+3. Keep sample fallback data until the first Firestore read/write is verified.
 
 ## Pending product work
 
-- Chat screen.
-- Listing details screen.
-- Hot-selling grid.
-- Vendor storefront.
-- Final Figma Profile styling.
+- Replace sample listing cards with Firestore data.
+- Connect Create Listing form to Firestore and Storage.
+- Add real search, categories, vendor data, reviews, and messaging.
 - Phone and Google authentication backend setup remains intentionally deferred.
 
 ## Recent commits

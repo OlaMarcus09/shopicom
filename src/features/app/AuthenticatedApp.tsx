@@ -18,6 +18,7 @@ import { ChatScreen } from '../messages/ChatScreen';
 import { ListingDetailsScreen } from '../listings/ListingDetailsScreen';
 import { HotSellingScreen } from '../listings/HotSellingScreen';
 import { VendorStorefrontScreen } from '../listings/VendorStorefrontScreen';
+import { ProfileDetailsScreen } from '../profile/ProfileDetailsScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -195,7 +196,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
-    screen = <ProfileScreen {...props} />;
+    screen = <ProfileDetailsScreen {...props} />;
   } else {
     screen = <PlaceholderScreen label={tabs.find((tab) => tab.key === activeTab)?.label ?? ''} />;
   }
