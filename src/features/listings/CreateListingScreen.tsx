@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 import {
+  ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -7,6 +10,9 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
+import { createListing } from './listing-service';
+import { uploadListingImages } from './listing-image-service';
 
 function SelectField({ label, value }: { label?: string; value: string }) {
   return (
@@ -33,6 +39,73 @@ function Choice({ active, label, square = false }: { active: boolean; label: str
 
 export function CreateListingScreen() {
   const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
+  const [price, setPrice] = useState('');
+  const [discount, setDiscount] = useState('');
+  const [location, setLocation] = useState('');
+  const [imageUris, setImageUris] = useState<string[]>([]);
+  const [isPosting, setIsPosting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  async function selectImages() {
+    setStatusMessage(null);
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      setStatusMessage('Allow photo access to choose listing images.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 10,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUris(result.assets.map((asset) => asset.uri).slice(0, 10));
+    }
+  }
+
+  async function submitListing() {
+    setStatusMessage(null);
+
+    if (imageUris.length === 0 || title.trim().length < 3 || !price || !location.trim() || !description.trim()) {
+      setStatusMessage('Add a photo, title, price, location, and description.');
+      return;
+    }
+
+    try {
+      setIsPosting(true);
+      const imageUrls = await uploadListingImages(imageUris);
+      await createListing({
+        title: title.trim(),
+        category: 'Electronics',
+        subCategory: 'Smart Watches',
+        type: 'Smart Watch',
+        condition: 'New',
+        price: Number(price),
+        discount: discount ? Number(discount) : undefined,
+        location: location.trim(),
+        deliveryOptions: ['in_store_pickup'],
+        negotiation: 'not_sure',
+        description: description.trim(),
+        imageUrls,
+      });
+      setStatusMessage('Listing posted successfully.');
+      setTitle('');
+      setPrice('');
+      setDiscount('');
+      setLocation('');
+      setDescription('');
+      setImageUris([]);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'Unable to post listing.');
+    } finally {
+      setIsPosting(false);
+    }
+  }
 
   return (
     <View style={styles.backdrop}>
@@ -49,14 +122,20 @@ export function CreateListingScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.label}>Media upload</Text>
-          <Pressable style={styles.uploadBox}>
+          <Pressable onPress={selectImages} style={styles.uploadBox}>
             <View style={styles.uploadIcon}><Text style={styles.uploadArrow}>↥</Text></View>
             <Text style={styles.uploadTitle}>Upload Media</Text>
             <Text style={styles.uploadHint}>Add a picture or video of what you want to sell.</Text>
             <Text style={styles.uploadHint}>Maximum file size: 20 MB</Text>
           </Pressable>
 
-          <TextInput placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} />
+          {imageUris.length ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.previewRow}>
+              {imageUris.map((uri) => <Image key={uri} source={{ uri }} style={styles.preview} />)}
+            </ScrollView>
+          ) : null}
+
+          <TextInput onChangeText={setTitle} placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} value={title} />
           <SelectField label="Category*" value="Select Category" />
           <SelectField label="Sub-Category*" value="Select Sub-Category" />
           <SelectField label="Type" value="Select Type" />
@@ -71,12 +150,12 @@ export function CreateListingScreen() {
           <View style={styles.divider} />
 
           <View style={styles.row}>
-            <View style={styles.half}><Text style={styles.label}>Price*</Text><TextInput keyboardType="numeric" placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} /></View>
-            <View style={styles.half}><Text style={styles.label}>Discount</Text><TextInput keyboardType="numeric" placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} /></View>
+            <View style={styles.half}><Text style={styles.label}>Price*</Text><TextInput keyboardType="numeric" onChangeText={setPrice} placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} value={price} /></View>
+            <View style={styles.half}><Text style={styles.label}>Discount</Text><TextInput keyboardType="numeric" onChangeText={setDiscount} placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} value={discount} /></View>
           </View>
 
           <Text style={styles.label}>Location*</Text>
-          <View style={styles.locationField}><Text style={styles.pin}>⌖</Text><TextInput placeholder="Business Location" placeholderTextColor="#999" style={styles.locationInput} /></View>
+          <View style={styles.locationField}><Text style={styles.pin}>⌖</Text><TextInput onChangeText={setLocation} placeholder="Business Location" placeholderTextColor="#999" style={styles.locationInput} value={location} /></View>
 
           <Text style={styles.sectionTitle}>Delivery Options</Text>
           <View style={styles.choiceRow}><Choice active label="In-store Pickup" square /><Choice active={false} label="Local Delivery" square /></View>
@@ -95,7 +174,8 @@ export function CreateListingScreen() {
           />
           <View style={styles.descriptionMeta}><Text style={styles.metaText}>Give more detailed description or more info</Text><Text style={styles.metaText}>{description.length}/1050</Text></View>
 
-          <Pressable style={styles.submit}><Text style={styles.submitText}>Post Listing</Text></Pressable>
+          {statusMessage ? <Text style={styles.status}>{statusMessage}</Text> : null}
+          <Pressable disabled={isPosting} onPress={submitListing} style={[styles.submit, isPosting && styles.disabled]}>{isPosting ? <ActivityIndicator color="#FFF" /> : <Text style={styles.submitText}>Post Listing</Text>}</Pressable>
         </ScrollView>
       </View>
     </View>
@@ -116,6 +196,8 @@ const styles = StyleSheet.create({
   uploadArrow: { color: '#2039A0', fontSize: 25, fontWeight: '800' },
   uploadTitle: { color: '#2039A0', fontSize: 15, fontWeight: '800', marginBottom: 2 },
   uploadHint: { color: '#656565', fontSize: 10, lineHeight: 13, textAlign: 'center' },
+  previewRow: { marginTop: -15, marginBottom: 20 },
+  preview: { width: 62, height: 62, borderRadius: 9, marginRight: 8 },
   input: { height: 48, borderWidth: 1, borderColor: '#EEE', borderRadius: 10, color: '#111', fontSize: 14, paddingHorizontal: 15, marginBottom: 22 },
   fieldGroup: { marginBottom: 20 },
   selectField: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#EEE', borderRadius: 10, paddingHorizontal: 15 },
@@ -141,6 +223,8 @@ const styles = StyleSheet.create({
   description: { height: 92, borderWidth: 1, borderColor: '#E3E3E3', borderRadius: 10, color: '#111', fontSize: 13, padding: 10 },
   descriptionMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5, marginBottom: 18 },
   metaText: { color: '#777', fontSize: 9 },
+  status: { color: '#555', fontSize: 12, lineHeight: 17, textAlign: 'center', marginBottom: 10 },
   submit: { height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: '#FF5A30' },
   submitText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
+  disabled: { opacity: 0.6 },
 });
