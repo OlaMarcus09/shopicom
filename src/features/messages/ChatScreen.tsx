@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-export function ChatScreen({ onBack }: { onBack: () => void }) {
+export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewItem: () => void }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -22,7 +22,7 @@ export function ChatScreen({ onBack }: { onBack: () => void }) {
           <View style={styles.store}><Text style={styles.storeName}>Sample Store</Text><Text style={styles.online}>Online</Text></View>
           <Text style={styles.menu}>⋮</Text>
         </View>
-        <View style={styles.regarding}><Text style={styles.regardingText}>Regarding: Men casual sneakers</Text><Pressable style={styles.viewItem}><Text style={styles.viewItemText}>View item</Text></Pressable></View>
+        <View style={styles.regarding}><Text style={styles.regardingText}>Regarding: Men casual sneakers</Text><Pressable onPress={onViewItem} style={styles.viewItem}><Text style={styles.viewItemText}>View item</Text></Pressable></View>
       </View>
 
       <View style={styles.chatBody}>
