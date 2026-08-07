@@ -1,0 +1,146 @@
+import { useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+
+function SelectField({ label, value }: { label?: string; value: string }) {
+  return (
+    <View style={styles.fieldGroup}>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+      <Pressable style={styles.selectField}>
+        <Text style={styles.selectText}>{value}</Text>
+        <Text style={styles.chevron}>⌄</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function Choice({ active, label, square = false }: { active: boolean; label: string; square?: boolean }) {
+  return (
+    <Pressable style={styles.choice}>
+      <View style={[square ? styles.checkbox : styles.radio, active && styles.choiceActive]}>
+        {active ? <Text style={styles.check}>✓</Text> : null}
+      </View>
+      <Text style={styles.choiceLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export function CreateListingScreen() {
+  const [description, setDescription] = useState('');
+
+  return (
+    <View style={styles.backdrop}>
+      <View style={styles.sheet}>
+        <View style={styles.header}>
+          <Text style={styles.back}>‹</Text>
+          <Text style={styles.headerTitle}>Post New Ads</Text>
+          <Text style={styles.close}>×</Text>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.label}>Media upload</Text>
+          <Pressable style={styles.uploadBox}>
+            <View style={styles.uploadIcon}><Text style={styles.uploadArrow}>↥</Text></View>
+            <Text style={styles.uploadTitle}>Upload Media</Text>
+            <Text style={styles.uploadHint}>Add a picture or video of what you want to sell.</Text>
+            <Text style={styles.uploadHint}>Maximum file size: 20 MB</Text>
+          </Pressable>
+
+          <TextInput placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} />
+          <SelectField label="Category*" value="Select Category" />
+          <SelectField label="Sub-Category*" value="Select Sub-Category" />
+          <SelectField label="Type" value="Select Type" />
+
+          <Text style={styles.sectionTitle}>Specifications</Text>
+          <View style={styles.row}>
+            <View style={styles.half}><Text style={styles.smallLabel}>TYPE</Text><TextInput placeholder="Type" placeholderTextColor="#999" style={styles.smallInput} /></View>
+            <View style={styles.half}><Text style={styles.smallLabel}>BRAND</Text><TextInput placeholder="Brand" placeholderTextColor="#999" style={styles.smallInput} /></View>
+          </View>
+
+          <SelectField label="Condition" value="New" />
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <View style={styles.half}><Text style={styles.label}>Price*</Text><TextInput keyboardType="numeric" placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} /></View>
+            <View style={styles.half}><Text style={styles.label}>Discount</Text><TextInput keyboardType="numeric" placeholder="GHC" placeholderTextColor="#999" style={styles.smallInput} /></View>
+          </View>
+
+          <Text style={styles.label}>Location*</Text>
+          <View style={styles.locationField}><Text style={styles.pin}>⌖</Text><TextInput placeholder="Business Location" placeholderTextColor="#999" style={styles.locationInput} /></View>
+
+          <Text style={styles.sectionTitle}>Delivery Options</Text>
+          <View style={styles.choiceRow}><Choice active label="In-store Pickup" square /><Choice active={false} label="Local Delivery" square /></View>
+
+          <Text style={styles.sectionTitle}>Are you open to negotiation?</Text>
+          <View style={styles.choiceRow}><Choice active={false} label="Yes" /><Choice active={false} label="No" /><Choice active label="Not sure" /></View>
+
+          <Text style={[styles.label, styles.descriptionLabel]}>Description*</Text>
+          <TextInput
+            multiline
+            maxLength={1050}
+            onChangeText={setDescription}
+            style={styles.description}
+            textAlignVertical="top"
+            value={description}
+          />
+          <View style={styles.descriptionMeta}><Text style={styles.metaText}>Give more detailed description or more info</Text><Text style={styles.metaText}>{description.length}/1050</Text></View>
+
+          <Pressable style={styles.submit}><Text style={styles.submitText}>Post Listing</Text></Pressable>
+        </ScrollView>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: '#AEB0AF', paddingHorizontal: 8, paddingTop: 8 },
+  sheet: { flex: 1, overflow: 'hidden', borderTopLeftRadius: 22, borderTopRightRadius: 22, backgroundColor: '#FFF' },
+  header: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#E8E8E8', paddingHorizontal: 18 },
+  back: { color: '#777', fontSize: 34, lineHeight: 36 },
+  close: { color: '#777', fontSize: 28, lineHeight: 32, fontWeight: '300' },
+  headerTitle: { color: '#111', fontSize: 20, fontWeight: '800' },
+  content: { paddingHorizontal: 18, paddingTop: 20, paddingBottom: 112 },
+  label: { color: '#242424', fontSize: 14, fontWeight: '700', marginBottom: 9 },
+  uploadBox: { height: 148, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#D7D0D0', borderRadius: 12, backgroundColor: '#FFFCFC', marginBottom: 26 },
+  uploadIcon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, backgroundColor: '#E9ECFF', marginBottom: 7 },
+  uploadArrow: { color: '#2039A0', fontSize: 25, fontWeight: '800' },
+  uploadTitle: { color: '#2039A0', fontSize: 15, fontWeight: '800', marginBottom: 2 },
+  uploadHint: { color: '#656565', fontSize: 10, lineHeight: 13, textAlign: 'center' },
+  input: { height: 48, borderWidth: 1, borderColor: '#EEE', borderRadius: 10, color: '#111', fontSize: 14, paddingHorizontal: 15, marginBottom: 22 },
+  fieldGroup: { marginBottom: 20 },
+  selectField: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#EEE', borderRadius: 10, paddingHorizontal: 15 },
+  selectText: { color: '#202020', fontSize: 14, fontWeight: '600' },
+  chevron: { color: '#777', fontSize: 21, fontWeight: '700' },
+  sectionTitle: { color: '#222', fontSize: 14, fontWeight: '800', marginBottom: 12 },
+  row: { flexDirection: 'row', gap: 14, marginBottom: 22 },
+  half: { flex: 1 },
+  smallLabel: { color: '#858080', fontSize: 11, fontWeight: '800', marginBottom: 6 },
+  smallInput: { height: 40, borderRadius: 8, backgroundColor: '#FCFCFC', color: '#111', fontSize: 13, paddingHorizontal: 12 },
+  divider: { height: 8, backgroundColor: '#F5F1F1', marginHorizontal: -18, marginBottom: 24 },
+  locationField: { height: 49, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 10, paddingHorizontal: 12, marginBottom: 24 },
+  pin: { color: '#AAA', fontSize: 22, marginRight: 7 },
+  locationInput: { flex: 1, color: '#111', fontSize: 13 },
+  choiceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 23 },
+  choice: { flexDirection: 'row', alignItems: 'center' },
+  checkbox: { width: 18, height: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#777' },
+  radio: { width: 17, height: 17, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#555', borderRadius: 9 },
+  choiceActive: { borderColor: '#4054C7', backgroundColor: '#4054C7' },
+  check: { color: '#FFF', fontSize: 11, fontWeight: '900' },
+  choiceLabel: { color: '#484848', fontSize: 13, marginLeft: 6 },
+  descriptionLabel: { color: '#536F16' },
+  description: { height: 92, borderWidth: 1, borderColor: '#E3E3E3', borderRadius: 10, color: '#111', fontSize: 13, padding: 10 },
+  descriptionMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5, marginBottom: 18 },
+  metaText: { color: '#777', fontSize: 9 },
+  submit: { height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: '#FF5A30' },
+  submitText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
+});
