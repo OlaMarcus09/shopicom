@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.sellerId == request.auth.uid;
+    }
+
+    function hasValidListingFields() {
+      return request.resource.data.keys().hasAll([
+          'title', 'category', 'subCategory', 'condition', 'price',
+          'location', 'deliveryOptions', 'negotiation', 'description',
+          'imageUrls', 'sellerId', 'sellerName', 'sellerEmail', 'status',
+          'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.category is string
+        && request.resource.data.subCategory is string
+        && request.resource.data.condition is string
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.location is string
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 1050
+        && request.resource.data.deliveryOptions is list
+        && request.resource.data.imageUrls is list
+        && request.resource.data.imageUrls.size() <= 10
+        && request.resource.data.negotiation in ['yes', 'no', 'not_sure']
+        && request.resource.data.status in ['active', 'draft', 'sold', 'archived'];
+    }
+
+    match /listings/{listingId} {
+      allow read: if resource.data.status == 'active' || isOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && hasValidListingFields();
+
+      allow update: if isOwner(resource.data)
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
+        && hasValidListingFields();
+
+      allow delete: if isOwner(resource.data);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

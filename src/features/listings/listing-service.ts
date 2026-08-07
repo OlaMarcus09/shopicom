@@ -6,6 +6,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  where,
 } from 'firebase/firestore';
 
 import { firebaseAuth, firebaseDb } from '../../services/firebase';
@@ -33,7 +34,12 @@ export async function createListing(input: CreateListingInput) {
 
 export async function getLatestListings(maximum = 20) {
   const snapshot = await getDocs(
-    query(listingsCollection, orderBy('createdAt', 'desc'), limit(maximum)),
+    query(
+      listingsCollection,
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc'),
+      limit(maximum),
+    ),
   );
 
   return snapshot.docs.map((document) => ({
