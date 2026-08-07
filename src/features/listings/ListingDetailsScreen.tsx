@@ -6,7 +6,7 @@ const specifications = [
   ['Number of Doors', '2'], ['Material', 'Metals'],
 ];
 
-export function ListingDetailsScreen({ onBack, onChat }: { onBack: () => void; onChat: () => void }) {
+export function ListingDetailsScreen({ onBack, onChat, onOpenVendor }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void }) {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -31,7 +31,7 @@ export function ListingDetailsScreen({ onBack, onChat }: { onBack: () => void; o
           <View style={styles.deliveryRow}><View style={styles.delivery}><Text style={styles.deliveryIcon}>▣</Text><View><Text style={styles.deliveryTitle}>In-store Pickup</Text><Text style={styles.deliveryCopy}>Available Now</Text></View></View><View style={styles.delivery}><Text style={styles.deliveryIcon}>▤</Text><View><Text style={styles.deliveryTitle}>Local Delivery</Text><Text style={styles.deliveryCopy}>Delivery fee may apply</Text></View></View></View>
         </View>
 
-        <View style={styles.vendor}><View style={styles.vendorAvatar}><Text style={styles.vendorInitial}>S</Text></View><View style={styles.vendorCopy}><Text style={styles.vendorName}>Sample Store</Text><Text style={styles.vendorMeta}>⌖ Banvum, Tamale</Text><Text style={styles.vendorMeta}>Recently joined</Text></View><View><Text style={styles.viewAds}>View Ads (0)</Text><Text style={styles.active}>Active 1hr ago</Text></View></View>
+        <Pressable onPress={onOpenVendor} style={styles.vendor}><View style={styles.vendorAvatar}><Text style={styles.vendorInitial}>S</Text></View><View style={styles.vendorCopy}><Text style={styles.vendorName}>Sample Store</Text><Text style={styles.vendorMeta}>⌖ Banvum, Tamale</Text><Text style={styles.vendorMeta}>Recently joined</Text></View><View><Text style={styles.viewAds}>View Ads (0)</Text><Text style={styles.active}>Active 1hr ago</Text></View></Pressable>
 
         <View style={styles.section}><View style={styles.reviewHeader}><Text style={styles.heading}>Product reviews</Text><Text style={styles.writeReview}>Write a review +</Text></View><View style={styles.review}><View style={styles.reviewer}><Text style={styles.reviewerInitial}>D</Text><Text style={styles.reviewerName}>Dizzy</Text><Text style={styles.reviewTime}>12 hr ago</Text></View><Text style={styles.stars}>★★★★☆</Text><Text style={styles.reviewText}>The product gives you the extra storage you need for food and beverages. The compact design fits smoothly into small spaces.</Text></View></View>
       </ScrollView>

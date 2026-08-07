@@ -17,6 +17,7 @@ import { MessagesScreen } from '../messages/MessagesScreen';
 import { ChatScreen } from '../messages/ChatScreen';
 import { ListingDetailsScreen } from '../listings/ListingDetailsScreen';
 import { HotSellingScreen } from '../listings/HotSellingScreen';
+import { VendorStorefrontScreen } from '../listings/VendorStorefrontScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -174,10 +175,13 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isListingOpen, setIsListingOpen] = useState(false);
   const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
+  const [isVendorOpen, setIsVendorOpen] = useState(false);
 
   let screen;
-  if (isListingOpen) {
-    screen = <ListingDetailsScreen onBack={() => setIsListingOpen(false)} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} />;
+  if (isVendorOpen) {
+    screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
+  } else if (isListingOpen) {
+    screen = <ListingDetailsScreen onBack={() => setIsListingOpen(false)} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
     screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={() => setIsListingOpen(true)} />;
   } else if (isChatOpen) {
@@ -199,7 +203,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
