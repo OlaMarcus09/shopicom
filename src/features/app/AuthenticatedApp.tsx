@@ -38,7 +38,7 @@ type AuthenticatedAppProps = {
 };
 
 function TabIcon({ active, tab }: { active: boolean; tab: AppTab }) {
-  const color = active ? '#FFFFFF' : '#6E6E6E';
+  const color = active ? '#F45100' : '#777777';
 
   if (tab === 'add') {
     return <Text style={[styles.addIcon, { color }]}>+</Text>;
@@ -88,7 +88,6 @@ function BottomTabBar({
     <View style={styles.tabBar}>
       {tabs.map((tab) => {
         const active = activeTab === tab.key;
-        const isHome = tab.key === 'home';
 
         return (
           <Pressable
@@ -101,11 +100,10 @@ function BottomTabBar({
             <View
               style={[
                 styles.tabIconContainer,
-                isHome && styles.homeTabIconContainer,
-                active && isHome && styles.homeTabIconSelected,
+                active && styles.tabIconSelected,
               ]}
             >
-              <TabIcon active={active && isHome} tab={tab.key} />
+              <TabIcon active={active} tab={tab.key} />
             </View>
             <Text
               numberOfLines={1}
@@ -221,116 +219,105 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 78,
+    left: 12,
+    right: 12,
+    bottom: 10,
+    height: 64,
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-around',
     backgroundColor: '#FFFFFF',
-    paddingBottom: 5,
+    borderRadius: 22,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
   },
   tabButton: {
     width: '20%',
-    minHeight: 68,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  tabIconContainer: {
-    width: 36,
-    height: 32,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 3,
   },
-  homeTabIconContainer: {
-    width: 62,
-    height: 62,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    borderRadius: 31,
-    marginBottom: 1,
+  tabIconContainer: {
+    width: 32,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
   },
-  homeTabIconSelected: {
-    backgroundColor: '#F45100',
-    shadowColor: '#FF8A3D',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 8,
+  tabIconSelected: {
+    backgroundColor: '#FFF0E8',
   },
   tabLabel: {
     color: '#6E6E6E',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 10,
+    lineHeight: 13,
     fontWeight: '600',
   },
   tabLabelSelected: {
     color: '#F45100',
   },
   addIcon: {
-    fontSize: 36,
-    lineHeight: 36,
-    fontWeight: '300',
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: '400',
   },
   categoryGridIcon: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 3,
+    gap: 2,
   },
   categoryGridDot: {
-    width: 12,
-    height: 12,
-    borderWidth: 2.5,
-    borderRadius: 6,
+    width: 9,
+    height: 9,
+    borderWidth: 2,
+    borderRadius: 5,
   },
   homeIcon: {
-    fontSize: 39,
-    lineHeight: 41,
-    fontWeight: '700',
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: '600',
   },
   inboxIcon: {
-    width: 25,
-    height: 21,
-    borderWidth: 2.5,
+    width: 22,
+    height: 18,
+    borderWidth: 2,
     borderRadius: 2,
   },
   inboxTail: {
     position: 'absolute',
     left: 2,
-    bottom: -6,
-    width: 9,
-    height: 9,
-    borderLeftWidth: 2.5,
-    borderBottomWidth: 2.5,
+    bottom: -5,
+    width: 8,
+    height: 8,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
     transform: [{ skewY: '-28deg' }],
   },
   profileIcon: {
-    width: 28,
-    height: 29,
+    width: 24,
+    height: 25,
     alignItems: 'center',
   },
   profileHead: {
-    width: 11,
-    height: 11,
-    borderWidth: 2.5,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderWidth: 2,
+    borderRadius: 5,
   },
   profileBody: {
-    width: 24,
-    height: 13,
-    borderWidth: 2.5,
+    width: 21,
+    height: 11,
+    borderWidth: 2,
     borderBottomWidth: 0,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
-    marginTop: 3,
+    marginTop: 2,
   },
   placeholderScreen: {
     flex: 1,
