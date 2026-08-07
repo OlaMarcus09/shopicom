@@ -1,7 +1,7 @@
 # Shopicom Mobile — Session Handoff
 
 **Updated:** 2026-08-06  
-**Current milestone:** Marketplace Home approved; Categories screen correction awaiting phone verification.  
+**Current milestone:** Home, Categories, Create Listing, and Inbox screens approved on Android.  
 **Working preference:** Complete and report one bounded step before moving to the next.
 
 ## Project configuration
@@ -23,9 +23,16 @@
 - Home advert now displays fully rather than being cropped.
 - Home header, categories, product cards, typography, and spacing resize for smaller phones.
 - Profile tab preserves the working logout flow.
+- Categories sidebar correction and six-tile grid verified on Android.
+- Compact Create Listing form implemented and approved.
+- Compact Inbox/Messages screen implemented and approved.
 - All 11 saved Figma screen exports are in `docs/figma/screens/`.
 
-## Categories work in progress
+## Mobile sizing standard
+
+The founder approved the compact Inbox scale as the standard for all remaining screens. Keep headings, controls, list rows, icons, and vertical spacing restrained. Avoid transferring oversized Figma-export dimensions directly to the phone UI. Existing Home, Categories, and Create Listing screens have already been compacted.
+
+## Categories implementation
 
 - Added `src/features/categories/CategoriesScreen.tsx` and connected it to the Categories bottom tab.
 - The first version had a layout bug on the physical phone: the sidebar expanded over the recommendation area and hid the six tiles.
@@ -35,7 +42,7 @@
   - A visible `3 × 2` six-tile grid.
   - Smaller phone-friendly typography and icons.
 - TypeScript and `git diff --check` passed after the correction.
-- The corrected Categories layout has **not yet been visually approved on the phone**.
+- The corrected Categories layout was visually approved on the phone.
 - `docs/figma/assets/Group 38.png` is the saved composite Categories reference. It is not a set of separate category assets.
 
 ## Exact next step
@@ -43,16 +50,10 @@
 1. Start Metro with:
    `EXPO_NO_TELEMETRY=1 npm run start -- --dev-client --lan --port 8097`
 2. Open the installed Shopicom app on the Android phone.
-3. Tap **Categories**.
-4. Confirm the sidebar no longer covers the recommendation panel and all six tiles are visible.
-5. Make one visual correction at a time if needed.
-6. After Categories is approved, continue to the next saved Figma screen.
+3. Continue with the next saved Figma screen using the approved compact sizing standard.
 
 ## Pending product work
 
-- Categories final visual approval.
-- Add/Create Listing screen.
-- Inbox/Messages screen.
 - Chat screen.
 - Listing details screen.
 - Hot-selling grid.

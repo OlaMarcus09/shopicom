@@ -13,6 +13,7 @@ import {
 import { HomeScreen } from '../home/HomeScreen';
 import { CategoriesScreen } from '../categories/CategoriesScreen';
 import { CreateListingScreen } from '../listings/CreateListingScreen';
+import { MessagesScreen } from '../messages/MessagesScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -175,6 +176,8 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {
     screen = <CategoriesScreen />;
+  } else if (activeTab === 'inbox') {
+    screen = <MessagesScreen />;
   } else if (activeTab === 'profile') {
     screen = <ProfileScreen {...props} />;
   } else {
