@@ -16,6 +16,7 @@ import { CreateListingScreen } from '../listings/CreateListingScreen';
 import { MessagesScreen } from '../messages/MessagesScreen';
 import { ChatScreen } from '../messages/ChatScreen';
 import { ListingDetailsScreen } from '../listings/ListingDetailsScreen';
+import { HotSellingScreen } from '../listings/HotSellingScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -172,14 +173,17 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isListingOpen, setIsListingOpen] = useState(false);
+  const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
 
   let screen;
   if (isListingOpen) {
-    screen = <ListingDetailsScreen onBack={() => setIsListingOpen(false)} onChat={() => { setIsListingOpen(false); setIsChatOpen(true); }} />;
+    screen = <ListingDetailsScreen onBack={() => setIsListingOpen(false)} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} />;
+  } else if (isHotSellingOpen) {
+    screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={() => setIsListingOpen(true)} />;
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {
@@ -195,7 +199,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }

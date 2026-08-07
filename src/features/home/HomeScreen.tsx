@@ -93,9 +93,11 @@ function CategoryShortcut({ kind, label }: { kind: CategoryKind; label: string }
 function SectionHeader({
   children,
   suffix,
+  onViewAll,
 }: {
   children: string;
   suffix?: string;
+  onViewAll?: () => void;
 }) {
   return (
     <View style={styles.sectionHeader}>
@@ -103,14 +105,14 @@ function SectionHeader({
         <Text style={styles.sectionTitle}>{children}</Text>
         {suffix ? <Text style={styles.sectionSuffix}>{suffix}</Text> : null}
       </View>
-      <Pressable accessibilityRole="button" hitSlop={8} onPress={() => undefined}>
+      <Pressable accessibilityRole="button" hitSlop={8} onPress={onViewAll}>
         <Text style={styles.viewAll}>view all ›</Text>
       </Pressable>
     </View>
   );
 }
 
-export function HomeScreen({ displayName }: { displayName?: string | null }) {
+export function HomeScreen({ displayName, onOpenHotSelling }: { displayName?: string | null; onOpenHotSelling?: () => void }) {
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
   const promoWidth = Math.max(screenWidth - 28, 0);
@@ -171,7 +173,7 @@ export function HomeScreen({ displayName }: { displayName?: string | null }) {
         ))}
       </ScrollView>
 
-      <SectionHeader suffix="🔥">Hot Selling Product</SectionHeader>
+      <SectionHeader onViewAll={onOpenHotSelling} suffix="🔥">Hot Selling Product</SectionHeader>
       <ScrollView
         contentContainerStyle={styles.productRow}
         horizontal
