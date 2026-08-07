@@ -5,7 +5,7 @@ const conversations = [
   { name: 'Sample Store 2', message: 'Hi', time: '06:14pm', image: require('../../../assets/home/product-card-watch.png'), initial: 'D', color: '#FF3428', verified: false },
 ];
 
-export function MessagesScreen() {
+export function MessagesScreen({ onOpenConversation }: { onOpenConversation: () => void }) {
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
@@ -14,7 +14,7 @@ export function MessagesScreen() {
       </View>
       <View style={styles.tabs}><Text style={[styles.tab, styles.activeTab]}>All</Text><Text style={styles.tab}>Unread</Text><Text style={styles.tab}>Spam</Text></View>
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {conversations.map((item) => <Pressable key={item.name} style={styles.conversation}><View><Image source={item.image} style={styles.avatarImage} /><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
+        {conversations.map((item) => <Pressable key={item.name} onPress={onOpenConversation} style={styles.conversation}><View><Image source={item.image} style={styles.avatarImage} /><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
       </ScrollView>
     </View>
   );

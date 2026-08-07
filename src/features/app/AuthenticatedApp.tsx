@@ -14,6 +14,7 @@ import { HomeScreen } from '../home/HomeScreen';
 import { CategoriesScreen } from '../categories/CategoriesScreen';
 import { CreateListingScreen } from '../listings/CreateListingScreen';
 import { MessagesScreen } from '../messages/MessagesScreen';
+import { ChatScreen } from '../messages/ChatScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -168,16 +169,19 @@ function ProfileScreen({
 
 export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   let screen;
-  if (activeTab === 'home') {
+  if (isChatOpen) {
+    screen = <ChatScreen onBack={() => setIsChatOpen(false)} />;
+  } else if (activeTab === 'home') {
     screen = <HomeScreen displayName={props.user.displayName} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {
     screen = <CategoriesScreen />;
   } else if (activeTab === 'inbox') {
-    screen = <MessagesScreen />;
+    screen = <MessagesScreen onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
     screen = <ProfileScreen {...props} />;
   } else {
@@ -187,7 +191,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />
+      {isChatOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
