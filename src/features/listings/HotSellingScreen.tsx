@@ -30,6 +30,8 @@ export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void
         {localListings.map((listing) => (
           <Pressable key={listing.id} onPress={() => onOpenProduct(listing)} style={styles.cardButton}>
             <Image accessibilityLabel={`${listing.title} listing`} resizeMode="contain" source={{ uri: listing.imageUrls[0] }} style={{ width: cardWidth, height: cardHeight }} />
+            <Text numberOfLines={1} style={styles.localTitle}>{listing.title}</Text>
+            <Text style={styles.localPrice}>GHS {listing.price}</Text>
           </Pressable>
         ))}
         {products.map((source, index) => (
@@ -50,4 +52,6 @@ const styles = StyleSheet.create({
   fire: { fontSize: 21, marginLeft: 6 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 11, paddingTop: 16, paddingBottom: 30 },
   cardButton: { borderRadius: 16, backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 5, elevation: 2 },
+  localTitle: { color: '#222', fontSize: 12, fontWeight: '700', paddingHorizontal: 8, marginTop: 5 },
+  localPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', paddingHorizontal: 8, paddingBottom: 8, marginTop: 3 },
 });

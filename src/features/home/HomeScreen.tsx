@@ -185,13 +185,15 @@ export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing }: { d
         showsHorizontalScrollIndicator={false}
       >
         {localListings.map((listing) => (
-          <Pressable key={listing.id} accessibilityRole="button" onPress={() => onOpenListing?.(listing)}>
+          <Pressable key={listing.id} accessibilityRole="button" onPress={() => onOpenListing?.(listing)} style={[styles.localProductCard, { width: productWidth }]}>
             <Image
               accessibilityLabel={`${listing.title} listing`}
               resizeMode="contain"
               source={{ uri: listing.imageUrls[0] }}
-              style={[styles.productCard, { width: productWidth, height: productHeight }]}
+              style={[styles.productCard, { width: productWidth, height: productHeight - 42 }]}
             />
+            <Text numberOfLines={1} style={styles.localProductTitle}>{listing.title}</Text>
+            <Text style={styles.localProductPrice}>GHS {listing.price}</Text>
           </Pressable>
         ))}
         <Pressable accessibilityRole="button" onPress={() => undefined}>
@@ -472,6 +474,9 @@ const styles = StyleSheet.create({
   productCard: {
     resizeMode: 'contain',
   },
+  localProductCard: { overflow: 'hidden', borderWidth: 1, borderColor: '#EEE', borderRadius: 13, backgroundColor: '#FFF', paddingBottom: 8 },
+  localProductTitle: { color: '#222', fontSize: 12, fontWeight: '700', paddingHorizontal: 8, marginTop: 5 },
+  localProductPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', paddingHorizontal: 8, marginTop: 3 },
   nearbyPlaceholder: {
     height: 110,
     alignItems: 'center',
