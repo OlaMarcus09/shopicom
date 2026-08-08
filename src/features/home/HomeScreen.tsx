@@ -75,11 +75,11 @@ function CategoryIcon({ kind }: { kind: CategoryKind }) {
   );
 }
 
-function CategoryShortcut({ kind, label }: { kind: CategoryKind; label: string }) {
+function CategoryShortcut({ kind, label, onPress }: { kind: CategoryKind; label: string; onPress?: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => undefined}
+      onPress={onPress}
       style={({ pressed }) => [
         styles.categoryCard,
         pressed && styles.pressed,
@@ -115,7 +115,7 @@ function SectionHeader({
   );
 }
 
-export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing, onOpenSearch }: { displayName?: string | null; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenSearch?: () => void }) {
+export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
@@ -174,7 +174,7 @@ export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing, onOpe
         showsHorizontalScrollIndicator={false}
       >
         {categories.map((category) => (
-          <CategoryShortcut key={category.kind} {...category} />
+          <CategoryShortcut key={category.kind} {...category} onPress={() => onOpenCategory?.(category.label)} />
         ))}
       </ScrollView>
 

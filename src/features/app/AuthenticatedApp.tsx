@@ -181,6 +181,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [selectedListing, setSelectedListing] = useState<LocalListing | undefined>();
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
 
   let screen;
   if (isSearchOpen) {
@@ -196,11 +197,11 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {
-    screen = <CategoriesScreen />;
+    screen = <CategoriesScreen initialCategory={categoryFilter} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {

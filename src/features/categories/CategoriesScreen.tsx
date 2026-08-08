@@ -1,4 +1,5 @@
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -6,6 +7,9 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+
+import { getLocalListings, type LocalListing } from '../listings/local-listing-service';
 
 const groups = [
   { label: 'Trending', icon: '✦', color: '#FFF0E8' },
@@ -22,15 +26,23 @@ const categories = [
   'Babies & Kids', 'Food, Agric & Farming', 'Sports & Entertainment',
 ];
 
-export function CategoriesScreen() {
+export function CategoriesScreen({ initialCategory, onOpenListing, onOpenSearch }: { initialCategory?: string; onOpenListing: (listing: LocalListing) => void; onOpenSearch: () => void }) {
+  const [selected, setSelected] = useState(initialCategory || 'Recommend');
+  const [listings, setListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const sidebarWidth = Math.min(116, width * 0.3);
+  useEffect(() => { getLocalListings().then(setListings).catch(() => setListings([])); }, []);
+  const matches = useMemo(() => {
+    if (selected === 'Recommend' || selected === 'Trending') return listings;
+    const term = selected.toLowerCase().replace('mobile ', '').replace(' & tablets', '').replace('laptops & ', '');
+    return listings.filter((listing) => [listing.category, listing.subCategory, listing.type, listing.title].some((value) => value?.toLowerCase().includes(term)));
+  }, [listings, selected]);
 
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
         <Text style={styles.back}>‹</Text>
-        <View style={styles.search}><Text style={styles.searchIcon}>⌕</Text><Text style={styles.searchText}>Search for anything</Text></View>
+        <Pressable onPress={onOpenSearch} style={styles.search}><Text style={styles.searchIcon}>⌕</Text><Text style={styles.searchText}>Search for anything</Text></Pressable>
       </View>
       <View style={styles.body}>
         <View style={[styles.side, { width: sidebarWidth }]}>
@@ -38,10 +50,10 @@ export function CategoriesScreen() {
             contentContainerStyle={styles.sideContent}
             showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.recommend}>Recommend</Text>
+            <Pressable onPress={() => setSelected('Recommend')}><Text style={styles.recommend}>Recommend</Text></Pressable>
             {categories.map((item) => (
-              <Pressable key={item} style={styles.sideItem}>
-                <Text style={styles.sideText}>{item}</Text>
+              <Pressable key={item} onPress={() => setSelected(item)} style={[styles.sideItem, selected === item && styles.sideItemActive]}>
+                <Text style={[styles.sideText, selected === item && styles.sideTextActive]}>{item}</Text>
               </Pressable>
             ))}
           </ScrollView>
@@ -53,12 +65,12 @@ export function CategoriesScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.contentHeader}>
-              <Text style={styles.title}>Recommend</Text>
+              <Text style={styles.title}>{selected}</Text>
               <Text style={styles.viewAll}>View all</Text>
             </View>
-            <View style={styles.grid}>
+            {matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.grid}>
               {groups.map((group) => (
-                <Pressable key={group.label} style={styles.tile}>
+                <Pressable key={group.label} onPress={() => setSelected(group.label)} style={styles.tile}>
                   <View style={[styles.icon, { backgroundColor: group.color }]}>
                     <Text style={styles.iconText}>{group.icon}</Text>
                   </View>
@@ -67,7 +79,7 @@ export function CategoriesScreen() {
                   </Text>
                 </Pressable>
               ))}
-            </View>
+            </View>}
           </ScrollView>
         </View>
       </View>
@@ -87,7 +99,9 @@ const styles = StyleSheet.create({
   sideContent: { paddingTop: 20, paddingBottom: 100 },
   recommend: { color: '#F45100', fontSize: 15, fontWeight: '800', paddingHorizontal: 10, marginBottom: 14 },
   sideItem: { paddingHorizontal: 10, paddingVertical: 13 },
+  sideItemActive: { backgroundColor: '#FFF' },
   sideText: { color: '#6D6869', fontSize: 14, lineHeight: 19, fontWeight: '600' },
+  sideTextActive: { color: '#F45100' },
   contentPane: { flex: 1, minWidth: 0, backgroundColor: '#FFF' },
   content: { paddingHorizontal: 12, paddingTop: 20, paddingBottom: 110 },
   contentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
@@ -98,4 +112,5 @@ const styles = StyleSheet.create({
   icon: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 7 },
   iconText: { color: '#F45100', fontSize: 27, fontWeight: '800' },
   tileLabel: { color: '#4C4647', fontSize: 12, lineHeight: 15, textAlign: 'center', fontWeight: '600' },
+  productList: { gap: 10 }, productCard: { flexDirection: 'row', borderWidth: 1, borderColor: '#EEE', borderRadius: 12, overflow: 'hidden' }, productImage: { width: 78, height: 82, backgroundColor: '#F7F7F7' }, productCopy: { flex: 1, justifyContent: 'center', paddingHorizontal: 10 }, productName: { color: '#222', fontSize: 13, fontWeight: '700' }, productPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', marginTop: 5 }, productLocation: { color: '#777', fontSize: 10, marginTop: 5 },
 });
