@@ -7,6 +7,9 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useEffect, useState } from 'react';
+
+import { getLocalListings, type LocalListing } from '../listings/local-listing-service';
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
@@ -113,6 +116,8 @@ function SectionHeader({
 }
 
 export function HomeScreen({ displayName, onOpenHotSelling }: { displayName?: string | null; onOpenHotSelling?: () => void }) {
+  const [localListings, setLocalListings] = useState<LocalListing[]>([]);
+  useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
   const promoWidth = Math.max(screenWidth - 28, 0);
@@ -179,6 +184,16 @@ export function HomeScreen({ displayName, onOpenHotSelling }: { displayName?: st
         horizontal
         showsHorizontalScrollIndicator={false}
       >
+        {localListings.map((listing) => (
+          <Pressable key={listing.id} accessibilityRole="button" onPress={onOpenHotSelling}>
+            <Image
+              accessibilityLabel={`${listing.title} listing`}
+              resizeMode="contain"
+              source={{ uri: listing.imageUrls[0] }}
+              style={[styles.productCard, { width: productWidth, height: productHeight }]}
+            />
+          </Pressable>
+        ))}
         <Pressable accessibilityRole="button" onPress={() => undefined}>
           <Image
             accessibilityLabel="White sneakers listing"

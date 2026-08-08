@@ -14,14 +14,20 @@ import {
 import { firebaseAuth } from '../../services/firebase';
 import { saveLocalListing } from './local-listing-service';
 
-function SelectField({ label, value }: { label?: string; value: string }) {
+function SelectField({ label, value, options, onChange }: { label?: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  const [open, setOpen] = useState(false);
   return (
     <View style={styles.fieldGroup}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
-      <Pressable style={styles.selectField}>
+      <Pressable onPress={() => setOpen((current) => !current)} style={styles.selectField}>
         <Text style={styles.selectText}>{value}</Text>
         <Text style={styles.chevron}>⌄</Text>
       </Pressable>
+      {open ? <View style={styles.optionsMenu}>
+        {options.map((option) => <Pressable key={option} onPress={() => { onChange(option); setOpen(false); }} style={styles.option}>
+          <Text style={styles.optionText}>{option}</Text>
+        </Pressable>)}
+      </View> : null}
     </View>
   );
 }
@@ -46,6 +52,10 @@ export function CreateListingScreen() {
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [category, setCategory] = useState('Select Category');
+  const [subCategory, setSubCategory] = useState('Select Sub-Category');
+  const [type, setType] = useState('Select Type');
+  const [condition, setCondition] = useState('New');
 
   async function selectImages() {
     setStatusMessage(null);
@@ -86,10 +96,10 @@ export function CreateListingScreen() {
       setIsPosting(true);
       await saveLocalListing({
         title: title.trim(),
-        category: 'Electronics',
-        subCategory: 'Smart Watches',
-        type: 'Smart Watch',
-        condition: 'New',
+        category: category === 'Select Category' ? 'Electronics' : category,
+        subCategory: subCategory === 'Select Sub-Category' ? 'Smart Watches' : subCategory,
+        type: type === 'Select Type' ? undefined : type,
+        condition,
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
         location: location.trim(),
@@ -141,9 +151,9 @@ export function CreateListingScreen() {
           ) : null}
 
           <TextInput onChangeText={setTitle} placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} value={title} />
-          <SelectField label="Category*" value="Select Category" />
-          <SelectField label="Sub-Category*" value="Select Sub-Category" />
-          <SelectField label="Type" value="Select Type" />
+          <SelectField label="Category*" value={category} options={['Electronics', 'Fashion', 'Home & Garden', 'Vehicles']} onChange={setCategory} />
+          <SelectField label="Sub-Category*" value={subCategory} options={['Smart Watches', 'Phones', 'Computers', 'Accessories']} onChange={setSubCategory} />
+          <SelectField label="Type" value={type} options={['Smart Watch', 'Phone', 'Tablet', 'Laptop']} onChange={setType} />
 
           <Text style={styles.sectionTitle}>Specifications</Text>
           <View style={styles.row}>
@@ -151,7 +161,7 @@ export function CreateListingScreen() {
             <View style={styles.half}><Text style={styles.smallLabel}>BRAND</Text><TextInput placeholder="Brand" placeholderTextColor="#999" style={styles.smallInput} /></View>
           </View>
 
-          <SelectField label="Condition" value="New" />
+          <SelectField label="Condition" value={condition} options={['New', 'Used - Like New', 'Used - Good']} onChange={setCondition} />
           <View style={styles.divider} />
 
           <View style={styles.row}>
@@ -206,6 +216,9 @@ const styles = StyleSheet.create({
   input: { height: 48, borderWidth: 1, borderColor: '#EEE', borderRadius: 10, color: '#111', fontSize: 14, paddingHorizontal: 15, marginBottom: 22 },
   fieldGroup: { marginBottom: 20 },
   selectField: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#EEE', borderRadius: 10, paddingHorizontal: 15 },
+  optionsMenu: { borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 8, backgroundColor: '#FFF', marginTop: 4, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  option: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F1F1F1' },
+  optionText: { color: '#333', fontSize: 14 },
   selectText: { color: '#202020', fontSize: 14, fontWeight: '600' },
   chevron: { color: '#777', fontSize: 21, fontWeight: '700' },
   sectionTitle: { color: '#222', fontSize: 14, fontWeight: '800', marginBottom: 12 },
