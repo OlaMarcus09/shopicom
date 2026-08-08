@@ -1,20 +1,31 @@
+import { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const conversations = [
-  { name: 'Sample Store', message: 'Hello', time: '11:47pm', image: require('../../../assets/home/product-card-sneakers.png'), initial: 'A', color: '#403A3A', verified: true },
-  { name: 'Sample Store 2', message: 'Hi', time: '06:14pm', image: require('../../../assets/home/product-card-watch.png'), initial: 'D', color: '#FF3428', verified: false },
+  { name: 'Sample Store', message: 'Hello', time: '11:47pm', image: require('../../../assets/home/product-card-sneakers.png'), initial: 'A', color: '#403A3A', verified: true, unread: true, spam: false },
+  { name: 'Sample Store 2', message: 'Hi', time: '06:14pm', image: require('../../../assets/home/product-card-watch.png'), initial: 'D', color: '#FF3428', verified: false, unread: false, spam: false },
 ];
 
+type InboxTab = 'All' | 'Unread' | 'Spam';
+
 export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => void; onOpenConversation: () => void }) {
+  const [activeTab, setActiveTab] = useState<InboxTab>('All');
+  const [query, setQuery] = useState('');
+  const filteredConversations = useMemo(() => conversations.filter((item) => {
+    const matchesTab = activeTab === 'All' || (activeTab === 'Unread' && item.unread) || (activeTab === 'Spam' && item.spam);
+    const term = query.trim().toLowerCase();
+    return matchesTab && (!term || item.name.toLowerCase().includes(term));
+  }), [activeTab, query]);
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
         <View style={styles.headerRow}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><Text style={styles.title}>Messages</Text><Text style={styles.bookmark}>▱</Text></View>
-        <View style={styles.search}><Text style={styles.searchIcon}>⌕</Text><TextInput placeholder="Search by name..." placeholderTextColor="#FFD0BC" style={styles.searchInput} /></View>
+        <View style={styles.search}><Text style={styles.searchIcon}>⌕</Text><TextInput onChangeText={setQuery} placeholder="Search by name..." placeholderTextColor="#FFD0BC" style={styles.searchInput} value={query} /></View>
       </View>
-      <View style={styles.tabs}><Text style={[styles.tab, styles.activeTab]}>All</Text><Text style={styles.tab}>Unread</Text><Text style={styles.tab}>Spam</Text></View>
+      <View style={styles.tabs}>{(['All', 'Unread', 'Spam'] as InboxTab[]).map((tab) => <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tabButton, activeTab === tab && styles.activeTab]}><Text style={[styles.tab, activeTab === tab && styles.activeTabText]}>{tab}</Text></Pressable>)}</View>
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {conversations.map((item) => <Pressable key={item.name} onPress={onOpenConversation} style={styles.conversation}><View><Image source={item.image} style={styles.avatarImage} /><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
+        {filteredConversations.map((item) => <Pressable key={item.name} onPress={onOpenConversation} style={styles.conversation}><View><Image source={item.image} style={styles.avatarImage} /><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
+        {!filteredConversations.length ? <Text style={styles.empty}>No conversations found.</Text> : null}
       </ScrollView>
     </View>
   );
@@ -31,8 +42,8 @@ const styles = StyleSheet.create({
   searchIcon: { color: '#FFD0BC', fontSize: 27, marginRight: 8 },
   searchInput: { flex: 1, color: '#FFF', fontSize: 15, paddingVertical: 0 },
   tabs: { height: 72, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', borderBottomWidth: 1, borderBottomColor: '#F2F2F2' },
-  tab: { alignSelf: 'stretch', paddingTop: 23, color: '#6B6B6B', fontSize: 18, fontWeight: '700', textAlign: 'center', width: '33%' },
-  activeTab: { color: '#F45145', borderBottomWidth: 4, borderBottomColor: '#F45145' },
+  tabButton: { alignSelf: 'stretch', justifyContent: 'center', width: '33%' }, tab: { color: '#6B6B6B', fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  activeTab: { borderBottomWidth: 4, borderBottomColor: '#F45145' }, activeTabText: { color: '#F45145' },
   list: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 100 },
   conversation: { flexDirection: 'row', alignItems: 'center', minHeight: 86, marginBottom: 8 },
   avatarImage: { width: 58, height: 58, borderRadius: 12 },
@@ -44,4 +55,5 @@ const styles = StyleSheet.create({
   verified: { color: '#FFF', backgroundColor: '#244AFF', borderRadius: 7, fontSize: 9, marginLeft: 4, paddingHorizontal: 3 },
   message: { color: '#333', fontSize: 14, marginTop: 7 },
   time: { color: '#333', fontSize: 12, alignSelf: 'center' },
+  empty: { color: '#777', fontSize: 13, textAlign: 'center', paddingTop: 60 },
 });
