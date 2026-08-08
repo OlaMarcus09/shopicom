@@ -11,8 +11,8 @@ import {
   View,
 } from 'react-native';
 
-import { createListing } from './listing-service';
-import { uploadListingImages } from './listing-image-service';
+import { firebaseAuth } from '../../services/firebase';
+import { saveLocalListing } from './local-listing-service';
 
 function SelectField({ label, value }: { label?: string; value: string }) {
   return (
@@ -76,10 +76,15 @@ export function CreateListingScreen() {
       return;
     }
 
+    const currentUser = firebaseAuth.currentUser;
+    if (!currentUser) {
+      setStatusMessage('Log in again before saving a listing.');
+      return;
+    }
+
     try {
       setIsPosting(true);
-      const imageUrls = await uploadListingImages(imageUris);
-      await createListing({
+      await saveLocalListing({
         title: title.trim(),
         category: 'Electronics',
         subCategory: 'Smart Watches',
@@ -91,9 +96,9 @@ export function CreateListingScreen() {
         deliveryOptions: ['in_store_pickup'],
         negotiation: 'not_sure',
         description: description.trim(),
-        imageUrls,
-      });
-      setStatusMessage('Listing posted successfully.');
+        imageUrls: imageUris,
+      }, currentUser);
+      setStatusMessage('Listing saved on this device.');
       setTitle('');
       setPrice('');
       setDiscount('');
