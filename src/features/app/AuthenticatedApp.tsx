@@ -22,6 +22,7 @@ import { ProfileDetailsScreen } from '../profile/ProfileDetailsScreen';
 import type { LocalListing } from '../listings/local-listing-service';
 import { MyListingsScreen } from '../listings/MyListingsScreen';
 import { SearchListingsScreen } from '../listings/SearchListingsScreen';
+import { FavoritesScreen } from '../listings/FavoritesScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -182,9 +183,12 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
 
   let screen;
-  if (isSearchOpen) {
+  if (isFavoritesOpen) {
+    screen = <FavoritesScreen onBack={() => setIsFavoritesOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsFavoritesOpen(false); setIsListingOpen(true); }} />;
+  } else if (isSearchOpen) {
     screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsSearchOpen(false); setIsListingOpen(true); }} />;
   } else if (isMyListingsOpen) {
     screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsMyListingsOpen(false); setIsListingOpen(true); }} />;
@@ -205,7 +209,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
-    screen = <ProfileDetailsScreen {...props} onOpenMyListings={() => setIsMyListingsOpen(true)} />;
+    screen = <ProfileDetailsScreen {...props} onOpenFavorites={() => setIsFavoritesOpen(true)} onOpenMyListings={() => setIsMyListingsOpen(true)} />;
   } else {
     screen = <PlaceholderScreen label={tabs.find((tab) => tab.key === activeTab)?.label ?? ''} />;
   }
@@ -213,7 +217,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }

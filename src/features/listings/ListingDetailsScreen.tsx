@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
+import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
 
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
   const imageSources = listing?.imageUrls.length ? listing.imageUrls.map((uri) => ({ uri })) : [imageSource];
   const [activeImage, setActiveImage] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { width } = useWindowDimensions();
+  useEffect(() => { if (listing) getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined); }, [listing]);
   const specifications = listing ? [
     ['Type', listing.type || listing.subCategory],
     ...(listing.brand ? [['Brand', listing.brand] as [string, string]] : []),
@@ -21,7 +24,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Text style={styles.share}>⌯</Text><Text style={styles.heart}>♡</Text></View></View>
+        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Text style={styles.share}>⌯</Text><Pressable disabled={!listing} onPress={async () => { if (listing) setIsFavorite(await toggleLocalFavorite(listing.id)); }}><Text style={[styles.heart, isFavorite && styles.heartActive]}>{isFavorite ? '♥' : '♡'}</Text></Pressable></View></View>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(event) => setActiveImage(Math.round(event.nativeEvent.contentOffset.x / width))}>
           {imageSources.map((source, index) => <Image key={index} resizeMode="contain" source={source} style={[styles.hero, { width }]} />)}
         </ScrollView>
@@ -59,6 +62,7 @@ const styles = StyleSheet.create({
   topActions: { height: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
   action: { color: '#333', fontSize: 34 },
   actionRow: { flexDirection: 'row', gap: 20 }, share: { fontSize: 23 }, heart: { fontSize: 29 },
+  heartActive: { color: '#F45100' },
   hero: { width: '100%', height: 250, backgroundColor: '#FAFAFA' },
   counter: { alignSelf: 'flex-end', borderRadius: 8, backgroundColor: '#333', paddingHorizontal: 7, paddingVertical: 3, marginRight: 17, marginTop: -32, marginBottom: 15 },
   counterText: { color: '#FFF', fontSize: 11, fontWeight: '700' },

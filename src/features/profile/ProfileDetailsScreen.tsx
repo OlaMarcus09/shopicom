@@ -1,7 +1,7 @@
 import type { User } from 'firebase/auth';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenMyListings: () => void; user: User };
+type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; user: User };
 
 const accountItems = ['My Listings', 'Become a Vendor', 'Favorites', 'Edit Profile', 'Privacy & Security'];
 const supportItems = ['Help & Support', 'Terms and Policies', 'App Settings'];
@@ -11,13 +11,13 @@ function MenuCard({ items, onPressItem }: { items: string[]; onPressItem?: (item
   return <View style={styles.menuCard}>{items.map((item) => <Pressable key={item} onPress={() => onPressItem?.(item)} style={styles.menuItem}><Text style={styles.menuIcon}>○</Text><Text style={styles.menuLabel}>{item}</Text><Text style={styles.arrow}>›</Text></Pressable>)}</View>;
 }
 
-export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenMyListings, user }: Props) {
+export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenFavorites, onOpenMyListings, user }: Props) {
   const initial = user.displayName?.trim().charAt(0).toUpperCase() || 'A';
   return <View style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}><Text style={styles.headerTitle}>Profile</Text><Text style={styles.share}>⌯</Text></View>
       <View style={styles.profile}><View style={styles.avatar}><Text style={styles.avatarText}>{initial}</Text></View><Text style={styles.name}>{user.displayName || 'Shopicom User'}</Text><Text style={styles.id}>{user.email || 'Account'}</Text><Text style={styles.location}>⌖  Area, City</Text><View style={styles.stats}><Text><Text style={styles.statOrange}>0 </Text>Followers</Text><Text><Text style={styles.statOrange}>0.0 </Text>Ratings(0)</Text><Text><Text style={styles.statOrange}>0 </Text>Following</Text></View><Text style={styles.bio}>No bio yet. Tell others about yourself</Text></View>
-      <Text style={styles.groupTitle}>ACCOUNT</Text><MenuCard items={accountItems} onPressItem={(item) => { if (item === 'My Listings') onOpenMyListings(); }} />
+      <Text style={styles.groupTitle}>ACCOUNT</Text><MenuCard items={accountItems} onPressItem={(item) => { if (item === 'My Listings') onOpenMyListings(); if (item === 'Favorites') onOpenFavorites(); }} />
       <Text style={styles.groupTitle}>SUPPORT & APP</Text><MenuCard items={supportItems} />
       <Text style={styles.groupTitle}>ABOUT</Text><MenuCard items={aboutItems} />
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
