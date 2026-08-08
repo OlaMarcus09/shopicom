@@ -5,6 +5,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
   const specifications = listing ? [
     ['Type', listing.type || listing.subCategory],
+    ...(listing.brand ? [['Brand', listing.brand] as [string, string]] : []),
     ['Category', listing.category],
     ['Condition', listing.condition],
     ['Location', listing.location],

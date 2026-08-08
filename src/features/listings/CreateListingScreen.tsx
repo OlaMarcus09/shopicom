@@ -56,6 +56,8 @@ export function CreateListingScreen() {
   const [subCategory, setSubCategory] = useState('Select Sub-Category');
   const [type, setType] = useState('Select Type');
   const [condition, setCondition] = useState('New');
+  const [specType, setSpecType] = useState('');
+  const [brand, setBrand] = useState('');
   const [deliveryOptions, setDeliveryOptions] = useState<Array<'in_store_pickup' | 'local_delivery'>>(['in_store_pickup']);
   const [negotiation, setNegotiation] = useState<'yes' | 'no' | 'not_sure'>('not_sure');
 
@@ -100,7 +102,8 @@ export function CreateListingScreen() {
         title: title.trim(),
         category: category === 'Select Category' ? 'Electronics' : category,
         subCategory: subCategory === 'Select Sub-Category' ? 'Smart Watches' : subCategory,
-        type: type === 'Select Type' ? undefined : type,
+        type: specType.trim() || (type === 'Select Type' ? undefined : type),
+        brand: brand.trim() || undefined,
         condition,
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
@@ -159,8 +162,8 @@ export function CreateListingScreen() {
 
           <Text style={styles.sectionTitle}>Specifications</Text>
           <View style={styles.row}>
-            <View style={styles.half}><Text style={styles.smallLabel}>TYPE</Text><TextInput placeholder="Type" placeholderTextColor="#999" style={styles.smallInput} /></View>
-            <View style={styles.half}><Text style={styles.smallLabel}>BRAND</Text><TextInput placeholder="Brand" placeholderTextColor="#999" style={styles.smallInput} /></View>
+            <View style={styles.half}><Text style={styles.smallLabel}>TYPE</Text><TextInput onChangeText={setSpecType} placeholder="Type" placeholderTextColor="#999" style={styles.smallInput} value={specType} /></View>
+            <View style={styles.half}><Text style={styles.smallLabel}>BRAND</Text><TextInput onChangeText={setBrand} placeholder="Brand" placeholderTextColor="#999" style={styles.smallInput} value={brand} /></View>
           </View>
 
           <SelectField label="Condition" value={condition} options={['New', 'Used - Like New', 'Used - Good']} onChange={setCondition} />
