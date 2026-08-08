@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -9,6 +11,14 @@ import {
 } from 'react-native';
 
 export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewItem: () => void }) {
+  const [draft, setDraft] = useState('');
+  const [messages, setMessages] = useState<Array<{ id: number; text: string }>>([]);
+  function sendMessage() {
+    const text = draft.trim();
+    if (!text) return;
+    setMessages((current) => [...current, { id: Date.now(), text }]);
+    setDraft('');
+  }
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -25,13 +35,14 @@ export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewI
         <View style={styles.regarding}><Text style={styles.regardingText}>Regarding: Men casual sneakers</Text><Pressable onPress={onViewItem} style={styles.viewItem}><Text style={styles.viewItemText}>View item</Text></Pressable></View>
       </View>
 
-      <View style={styles.chatBody}>
+      <ScrollView contentContainerStyle={styles.chatBody} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.advice}><Text style={styles.warning}>!</Text><View style={styles.adviceCopy}><Text style={styles.adviceTitle}>SECURITY ADVICE</Text><Text style={styles.adviceText}>To avoid scams, do not pay in advance for delivery. Shopicom will not be responsible for any loss.</Text></View></View>
         <Text style={styles.day}>Yesterday</Text>
         <View style={styles.message}><Text style={styles.messageText}>Hello</Text><Text style={styles.messageTime}>11:47 pm ✓</Text></View>
-      </View>
+        {messages.map((message) => <View key={message.id} style={styles.message}><Text style={styles.messageText}>{message.text}</Text><Text style={styles.messageTime}>Now ✓</Text></View>)}
+      </ScrollView>
 
-      <View style={styles.composer}><Text style={styles.emoji}>☺</Text><TextInput placeholder="Write a message" placeholderTextColor="#999" style={styles.input} /><Text style={styles.camera}>▣</Text></View>
+      <View style={styles.composer}><Text style={styles.emoji}>☺</Text><TextInput onChangeText={setDraft} onSubmitEditing={sendMessage} placeholder="Write a message" placeholderTextColor="#999" returnKeyType="send" style={styles.input} value={draft} />{draft.trim() ? <Pressable hitSlop={8} onPress={sendMessage}><Text style={styles.send}>➤</Text></Pressable> : <Text style={styles.camera}>▣</Text>}</View>
     </KeyboardAvoidingView>
   );
 }
@@ -65,4 +76,5 @@ const styles = StyleSheet.create({
   emoji: { color: '#7B7B7B', fontSize: 22 },
   input: { flex: 1, color: '#111', fontSize: 15, fontWeight: '600', paddingHorizontal: 12, paddingVertical: 0 },
   camera: { color: '#777', fontSize: 24 },
+  send: { color: '#F45100', fontSize: 24 },
 });
