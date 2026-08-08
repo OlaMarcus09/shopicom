@@ -14,6 +14,7 @@ export type CreateListingInput = {
   price: number;
   discount?: number;
   location: string;
+  contactPhone?: string;
   deliveryOptions: DeliveryOption[];
   negotiation: NegotiationPreference;
   description: string;

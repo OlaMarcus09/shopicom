@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
 import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
 
@@ -16,6 +16,14 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
     const location = listing?.location || 'Banvum Tamale';
     const description = listing?.description || 'View this product on Shopicom.';
     await Share.share({ message: `${title}\nGHS ${price}\n${location}\n\n${description}\n\nShared from Shopicom` });
+  }
+  async function callSeller() {
+    if (!listing?.contactPhone) {
+      Alert.alert('Phone number unavailable', 'This seller did not add a contact phone number.');
+      return;
+    }
+    const phone = listing.contactPhone.replace(/[^+\d]/g, '');
+    await Linking.openURL(`tel:${phone}`);
   }
   const specifications = listing ? [
     ['Type', listing.type || listing.subCategory],
@@ -43,7 +51,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
           <View style={styles.priceRow}><Text style={styles.price}>GHS {listing?.price ?? 200}</Text>{listing?.discount ? <Text style={styles.discount}>-{listing.discount}%</Text> : <><Text style={styles.oldPrice}>GHS 250</Text><Text style={styles.discount}>-25%</Text></>}</View>
           <Text style={styles.location}>⌖  {listing?.location || 'Banvum Tamale'}</Text>
           <Text style={styles.rating}>★★★★★  <Text style={styles.ratingCopy}>0.0   (0 reviews)</Text></Text>
-          <View style={styles.contactRow}><Pressable style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable></View>
+          <View style={styles.contactRow}><Pressable onPress={callSeller} style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable></View>
         </View>
 
         <View style={styles.section}>

@@ -49,6 +49,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   const [price, setPrice] = useState('');
   const [discount, setDiscount] = useState('');
   const [location, setLocation] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -108,6 +109,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
         location: location.trim(),
+        contactPhone: contactPhone.trim() || undefined,
         deliveryOptions,
         negotiation,
         description: description.trim(),
@@ -176,6 +178,9 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
 
           <Text style={styles.label}>Location*</Text>
           <View style={styles.locationField}><Text style={styles.pin}>⌖</Text><TextInput onChangeText={setLocation} placeholder="Business Location" placeholderTextColor="#999" style={styles.locationInput} value={location} /></View>
+
+          <Text style={styles.label}>Contact Phone</Text>
+          <TextInput keyboardType="phone-pad" onChangeText={setContactPhone} placeholder="e.g. +233 24 000 0000" placeholderTextColor="#999" style={styles.input} value={contactPhone} />
 
           <Text style={styles.sectionTitle}>Delivery Options</Text>
           <View style={styles.choiceRow}><Choice active={deliveryOptions.includes('in_store_pickup')} label="In-store Pickup" square onPress={() => setDeliveryOptions((current) => current.includes('in_store_pickup') ? current.filter((item) => item !== 'in_store_pickup') : [...current, 'in_store_pickup'])} /><Choice active={deliveryOptions.includes('local_delivery')} label="Local Delivery" square onPress={() => setDeliveryOptions((current) => current.includes('local_delivery') ? current.filter((item) => item !== 'local_delivery') : [...current, 'local_delivery'])} /></View>
