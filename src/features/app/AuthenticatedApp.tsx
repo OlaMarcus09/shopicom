@@ -25,6 +25,7 @@ import { SearchListingsScreen } from '../listings/SearchListingsScreen';
 import { FavoritesScreen } from '../listings/FavoritesScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
+type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'search';
 
 const tabs: Array<{ key: AppTab; label: string }> = [
   { key: 'add', label: 'Add' },
@@ -184,28 +185,48 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [listingOrigin, setListingOrigin] = useState<ListingOrigin>('home');
+
+  function openListing(listing: LocalListing | undefined, origin: ListingOrigin) {
+    setSelectedListing(listing);
+    setListingOrigin(origin);
+    setIsFavoritesOpen(false);
+    setIsSearchOpen(false);
+    setIsMyListingsOpen(false);
+    setIsHotSellingOpen(false);
+    setIsListingOpen(true);
+  }
+
+  function closeListing() {
+    setSelectedListing(undefined);
+    setIsListingOpen(false);
+    if (listingOrigin === 'favorites') setIsFavoritesOpen(true);
+    if (listingOrigin === 'search') setIsSearchOpen(true);
+    if (listingOrigin === 'my-listings') setIsMyListingsOpen(true);
+    if (listingOrigin === 'hot-selling') setIsHotSellingOpen(true);
+  }
 
   let screen;
   if (isFavoritesOpen) {
-    screen = <FavoritesScreen onBack={() => setIsFavoritesOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsFavoritesOpen(false); setIsListingOpen(true); }} />;
+    screen = <FavoritesScreen onBack={() => setIsFavoritesOpen(false)} onOpenListing={(listing) => openListing(listing, 'favorites')} />;
   } else if (isSearchOpen) {
-    screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsSearchOpen(false); setIsListingOpen(true); }} />;
+    screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => openListing(listing, 'search')} />;
   } else if (isMyListingsOpen) {
-    screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsMyListingsOpen(false); setIsListingOpen(true); }} />;
+    screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => openListing(listing, 'my-listings')} />;
   } else if (isVendorOpen) {
     screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
   } else if (isListingOpen) {
-    screen = <ListingDetailsScreen listing={selectedListing} onBack={() => { setSelectedListing(undefined); setIsListingOpen(false); }} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
+    screen = <ListingDetailsScreen listing={selectedListing} onBack={closeListing} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
-    screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={(listing) => { setSelectedListing(listing); setIsHotSellingOpen(false); setIsListingOpen(true); }} />;
+    screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={(listing) => openListing(listing, 'hot-selling')} />;
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen onClose={() => setActiveTab('home')} />;
   } else if (activeTab === 'categories') {
-    screen = <CategoriesScreen initialCategory={categoryFilter} onBack={() => setActiveTab('home')} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <CategoriesScreen initialCategory={categoryFilter} onBack={() => setActiveTab('home')} onOpenListing={(listing) => openListing(listing, 'categories')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
