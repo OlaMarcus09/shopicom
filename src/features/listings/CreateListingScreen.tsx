@@ -43,7 +43,7 @@ function Choice({ active, label, square = false, onPress }: { active: boolean; l
   );
 }
 
-export function CreateListingScreen() {
+export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
@@ -131,9 +131,9 @@ export function CreateListingScreen() {
     <View style={styles.backdrop}>
       <View style={styles.sheet}>
         <View style={styles.header}>
-          <Text style={styles.back}>‹</Text>
+          <Pressable hitSlop={10} onPress={onClose}><Text style={styles.back}>‹</Text></Pressable>
           <Text style={styles.headerTitle}>Post New Ads</Text>
-          <Text style={styles.close}>×</Text>
+          <Pressable hitSlop={10} onPress={onClose}><Text style={styles.close}>×</Text></Pressable>
         </View>
 
         <ScrollView

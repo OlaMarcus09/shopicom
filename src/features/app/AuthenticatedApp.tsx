@@ -199,7 +199,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'home') {
     screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
-    screen = <CreateListingScreen />;
+    screen = <CreateListingScreen onClose={() => setActiveTab('home')} />;
   } else if (activeTab === 'categories') {
     screen = <CategoriesScreen initialCategory={categoryFilter} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'inbox') {
