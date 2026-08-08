@@ -224,7 +224,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isMyListingsOpen) {
     screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => openListing(listing, 'my-listings')} />;
   } else if (isVendorOpen) {
-    screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
+    screen = <VendorStorefrontScreen listing={selectedListing} onBack={() => setIsVendorOpen(false)} onMessage={() => { setIsVendorOpen(false); setIsListingOpen(false); setIsChatOpen(true); }} onOpenProduct={(listing) => { if (listing) setSelectedListing(listing); setIsVendorOpen(false); }} />;
   } else if (isListingOpen) {
     screen = <ListingDetailsScreen listing={selectedListing} onBack={closeListing} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
