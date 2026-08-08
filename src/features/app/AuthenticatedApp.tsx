@@ -20,6 +20,7 @@ import { HotSellingScreen } from '../listings/HotSellingScreen';
 import { VendorStorefrontScreen } from '../listings/VendorStorefrontScreen';
 import { ProfileDetailsScreen } from '../profile/ProfileDetailsScreen';
 import type { LocalListing } from '../listings/local-listing-service';
+import { MyListingsScreen } from '../listings/MyListingsScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -177,9 +178,12 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
   const [isVendorOpen, setIsVendorOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<LocalListing | undefined>();
+  const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
 
   let screen;
-  if (isVendorOpen) {
+  if (isMyListingsOpen) {
+    screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsMyListingsOpen(false); setIsListingOpen(true); }} />;
+  } else if (isVendorOpen) {
     screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
   } else if (isListingOpen) {
     screen = <ListingDetailsScreen listing={selectedListing} onBack={() => { setSelectedListing(undefined); setIsListingOpen(false); }} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
@@ -196,7 +200,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
-    screen = <ProfileDetailsScreen {...props} />;
+    screen = <ProfileDetailsScreen {...props} onOpenMyListings={() => setIsMyListingsOpen(true)} />;
   } else {
     screen = <PlaceholderScreen label={tabs.find((tab) => tab.key === activeTab)?.label ?? ''} />;
   }
@@ -204,7 +208,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
