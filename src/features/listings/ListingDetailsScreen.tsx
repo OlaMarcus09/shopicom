@@ -1,14 +1,18 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
 
-const specifications = [
-  ['Type', 'Refrigerators'], ['Brand', 'Nasco'], ['Condition', 'Brand New'],
-  ['Color', 'Silver'], ['Power Source', 'Electric'], ['Energy Class', 'A++'],
-  ['Number of Doors', '2'], ['Material', 'Metals'],
-];
-
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
+  const specifications = listing ? [
+    ['Type', listing.type || listing.subCategory],
+    ['Category', listing.category],
+    ['Condition', listing.condition],
+    ['Location', listing.location],
+  ] : [
+    ['Type', 'Refrigerators'], ['Brand', 'Nasco'], ['Condition', 'Brand New'],
+    ['Color', 'Silver'], ['Power Source', 'Electric'], ['Energy Class', 'A++'],
+    ['Number of Doors', '2'], ['Material', 'Metals'],
+  ];
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -30,10 +34,10 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
           <Text style={styles.heading}>Description</Text>
           <Text style={styles.description}>{listing?.description || 'The Nasco NASF2-10FL 76 Liter Table Top Fridge gives you the extra storage you need for food and beverages. Its compact size complements most spaces smoothly.'}</Text>
           <Text style={styles.heading}>Select Delivery Method</Text>
-          <View style={styles.deliveryRow}><View style={styles.delivery}><Text style={styles.deliveryIcon}>▣</Text><View><Text style={styles.deliveryTitle}>In-store Pickup</Text><Text style={styles.deliveryCopy}>Available Now</Text></View></View><View style={styles.delivery}><Text style={styles.deliveryIcon}>▤</Text><View><Text style={styles.deliveryTitle}>Local Delivery</Text><Text style={styles.deliveryCopy}>Delivery fee may apply</Text></View></View></View>
+          <View style={styles.deliveryRow}>{listing?.deliveryOptions.includes('in_store_pickup') || !listing ? <View style={styles.delivery}><Text style={styles.deliveryIcon}>▣</Text><View><Text style={styles.deliveryTitle}>In-store Pickup</Text><Text style={styles.deliveryCopy}>Available Now</Text></View></View> : null}{listing?.deliveryOptions.includes('local_delivery') || !listing ? <View style={styles.delivery}><Text style={styles.deliveryIcon}>▤</Text><View><Text style={styles.deliveryTitle}>Local Delivery</Text><Text style={styles.deliveryCopy}>Delivery fee may apply</Text></View></View> : null}</View>
         </View>
 
-        <Pressable onPress={onOpenVendor} style={styles.vendor}><View style={styles.vendorAvatar}><Text style={styles.vendorInitial}>S</Text></View><View style={styles.vendorCopy}><Text style={styles.vendorName}>Sample Store</Text><Text style={styles.vendorMeta}>⌖ Banvum, Tamale</Text><Text style={styles.vendorMeta}>Recently joined</Text></View><View><Text style={styles.viewAds}>View Ads (0)</Text><Text style={styles.active}>Active 1hr ago</Text></View></Pressable>
+        <Pressable onPress={onOpenVendor} style={styles.vendor}><View style={styles.vendorAvatar}><Text style={styles.vendorInitial}>{(listing?.sellerName || 'S').charAt(0).toUpperCase()}</Text></View><View style={styles.vendorCopy}><Text style={styles.vendorName}>{listing?.sellerName || 'Sample Store'}</Text><Text style={styles.vendorMeta}>⌖ {listing?.location || 'Banvum, Tamale'}</Text><Text style={styles.vendorMeta}>{listing ? 'Local listing' : 'Recently joined'}</Text></View><View><Text style={styles.viewAds}>View Ads (0)</Text><Text style={styles.active}>Active now</Text></View></Pressable>
 
         <View style={styles.section}><View style={styles.reviewHeader}><Text style={styles.heading}>Product reviews</Text><Text style={styles.writeReview}>Write a review +</Text></View><View style={styles.review}><View style={styles.reviewer}><Text style={styles.reviewerInitial}>D</Text><Text style={styles.reviewerName}>Dizzy</Text><Text style={styles.reviewTime}>12 hr ago</Text></View><Text style={styles.stars}>★★★★☆</Text><Text style={styles.reviewText}>The product gives you the extra storage you need for food and beverages. The compact design fits smoothly into small spaces.</Text></View></View>
       </ScrollView>
