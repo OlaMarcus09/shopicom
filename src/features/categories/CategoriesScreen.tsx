@@ -26,7 +26,7 @@ const categories = [
   'Babies & Kids', 'Food, Agric & Farming', 'Sports & Entertainment',
 ];
 
-export function CategoriesScreen({ initialCategory, onOpenListing, onOpenSearch }: { initialCategory?: string; onOpenListing: (listing: LocalListing) => void; onOpenSearch: () => void }) {
+export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpenSearch }: { initialCategory?: string; onBack: () => void; onOpenListing: (listing: LocalListing) => void; onOpenSearch: () => void }) {
   const [selected, setSelected] = useState(initialCategory || 'Recommend');
   const [listings, setListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
@@ -41,7 +41,7 @@ export function CategoriesScreen({ initialCategory, onOpenListing, onOpenSearch 
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
-        <Text style={styles.back}>‹</Text>
+        <Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable>
         <Pressable onPress={onOpenSearch} style={styles.search}><Text style={styles.searchIcon}>⌕</Text><Text style={styles.searchText}>Search for anything</Text></Pressable>
       </View>
       <View style={styles.body}>
