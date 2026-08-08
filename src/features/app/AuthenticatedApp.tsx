@@ -203,7 +203,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'categories') {
     screen = <CategoriesScreen initialCategory={categoryFilter} onBack={() => setActiveTab('home')} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'inbox') {
-    screen = <MessagesScreen onOpenConversation={() => setIsChatOpen(true)} />;
+    screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
     screen = <ProfileDetailsScreen {...props} onOpenMyListings={() => setIsMyListingsOpen(true)} />;
   } else {

@@ -5,11 +5,11 @@ const conversations = [
   { name: 'Sample Store 2', message: 'Hi', time: '06:14pm', image: require('../../../assets/home/product-card-watch.png'), initial: 'D', color: '#FF3428', verified: false },
 ];
 
-export function MessagesScreen({ onOpenConversation }: { onOpenConversation: () => void }) {
+export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => void; onOpenConversation: () => void }) {
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
-        <View style={styles.headerRow}><Text style={styles.back}>‹</Text><Text style={styles.title}>Messages</Text><Text style={styles.bookmark}>▱</Text></View>
+        <View style={styles.headerRow}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><Text style={styles.title}>Messages</Text><Text style={styles.bookmark}>▱</Text></View>
         <View style={styles.search}><Text style={styles.searchIcon}>⌕</Text><TextInput placeholder="Search by name..." placeholderTextColor="#FFD0BC" style={styles.searchInput} /></View>
       </View>
       <View style={styles.tabs}><Text style={[styles.tab, styles.activeTab]}>All</Text><Text style={styles.tab}>Unread</Text><Text style={styles.tab}>Spam</Text></View>
