@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
 import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
 
@@ -10,6 +10,13 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   const [isFavorite, setIsFavorite] = useState(false);
   const { width } = useWindowDimensions();
   useEffect(() => { if (listing) getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined); }, [listing]);
+  async function shareListing() {
+    const title = listing?.title || 'Ultra smart watch';
+    const price = listing?.price ?? 200;
+    const location = listing?.location || 'Banvum Tamale';
+    const description = listing?.description || 'View this product on Shopicom.';
+    await Share.share({ message: `${title}\nGHS ${price}\n${location}\n\n${description}\n\nShared from Shopicom` });
+  }
   const specifications = listing ? [
     ['Type', listing.type || listing.subCategory],
     ...(listing.brand ? [['Brand', listing.brand] as [string, string]] : []),
@@ -24,7 +31,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Text style={styles.share}>⌯</Text><Pressable disabled={!listing} onPress={async () => { if (listing) setIsFavorite(await toggleLocalFavorite(listing.id)); }}><Text style={[styles.heart, isFavorite && styles.heartActive]}>{isFavorite ? '♥' : '♡'}</Text></Pressable></View></View>
+        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Pressable hitSlop={8} onPress={shareListing}><Text style={styles.share}>⌯</Text></Pressable><Pressable disabled={!listing} onPress={async () => { if (listing) setIsFavorite(await toggleLocalFavorite(listing.id)); }}><Text style={[styles.heart, isFavorite && styles.heartActive]}>{isFavorite ? '♥' : '♡'}</Text></Pressable></View></View>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(event) => setActiveImage(Math.round(event.nativeEvent.contentOffset.x / width))}>
           {imageSources.map((source, index) => <Image key={index} resizeMode="contain" source={source} style={[styles.hero, { width }]} />)}
         </ScrollView>
@@ -51,7 +58,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
 
         <View style={styles.section}><View style={styles.reviewHeader}><Text style={styles.heading}>Product reviews</Text><Text style={styles.writeReview}>Write a review +</Text></View><View style={styles.review}><View style={styles.reviewer}><Text style={styles.reviewerInitial}>D</Text><Text style={styles.reviewerName}>Dizzy</Text><Text style={styles.reviewTime}>12 hr ago</Text></View><Text style={styles.stars}>★★★★☆</Text><Text style={styles.reviewText}>The product gives you the extra storage you need for food and beverages. The compact design fits smoothly into small spaces.</Text></View></View>
       </ScrollView>
-      <View style={styles.bottom}><Pressable onPress={onChat} style={styles.chatButton}><Text style={styles.chatText}>◯  Chat with Vendor</Text></Pressable><Pressable style={styles.shareButton}><Text style={styles.shareBottom}>⌯</Text></Pressable></View>
+      <View style={styles.bottom}><Pressable onPress={onChat} style={styles.chatButton}><Text style={styles.chatText}>◯  Chat with Vendor</Text></Pressable><Pressable onPress={shareListing} style={styles.shareButton}><Text style={styles.shareBottom}>⌯</Text></Pressable></View>
     </View>
   );
 }
