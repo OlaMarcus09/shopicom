@@ -19,6 +19,7 @@ import { ListingDetailsScreen } from '../listings/ListingDetailsScreen';
 import { HotSellingScreen } from '../listings/HotSellingScreen';
 import { VendorStorefrontScreen } from '../listings/VendorStorefrontScreen';
 import { ProfileDetailsScreen } from '../profile/ProfileDetailsScreen';
+import type { LocalListing } from '../listings/local-listing-service';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -175,18 +176,19 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isListingOpen, setIsListingOpen] = useState(false);
   const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
   const [isVendorOpen, setIsVendorOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<LocalListing | undefined>();
 
   let screen;
   if (isVendorOpen) {
     screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
   } else if (isListingOpen) {
-    screen = <ListingDetailsScreen onBack={() => setIsListingOpen(false)} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
+    screen = <ListingDetailsScreen listing={selectedListing} onBack={() => { setSelectedListing(undefined); setIsListingOpen(false); }} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
     screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={() => setIsListingOpen(true)} />;
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {

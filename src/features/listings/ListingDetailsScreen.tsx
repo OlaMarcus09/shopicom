@@ -1,4 +1,5 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { LocalListing } from './local-listing-service';
 
 const specifications = [
   ['Type', 'Refrigerators'], ['Brand', 'Nasco'], ['Condition', 'Brand New'],
@@ -6,19 +7,20 @@ const specifications = [
   ['Number of Doors', '2'], ['Material', 'Metals'],
 ];
 
-export function ListingDetailsScreen({ onBack, onChat, onOpenVendor }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void }) {
+export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
+  const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Text style={styles.share}>⌯</Text><Text style={styles.heart}>♡</Text></View></View>
-        <Image resizeMode="contain" source={require('../../../assets/listings/smart-watch-orange.png')} style={styles.hero} />
+        <Image resizeMode="contain" source={imageSource} style={styles.hero} />
         <View style={styles.counter}><Text style={styles.counterText}>1/14</Text></View>
 
         <View style={styles.section}>
-          <Text style={styles.title}>Ultra smart watch</Text>
+          <Text style={styles.title}>{listing?.title || 'Ultra smart watch'}</Text>
           <View style={styles.badges}><Text style={styles.storeBadge}>PHYSICAL STORE</Text><Text style={styles.verifiedBadge}>VERIFIED</Text></View>
-          <View style={styles.priceRow}><Text style={styles.price}>GHS 200</Text><Text style={styles.oldPrice}>GHS 250</Text><Text style={styles.discount}>-25%</Text></View>
-          <Text style={styles.location}>⌖  Banvum Tamale</Text>
+          <View style={styles.priceRow}><Text style={styles.price}>GHS {listing?.price ?? 200}</Text>{listing?.discount ? <Text style={styles.discount}>-{listing.discount}%</Text> : <><Text style={styles.oldPrice}>GHS 250</Text><Text style={styles.discount}>-25%</Text></>}</View>
+          <Text style={styles.location}>⌖  {listing?.location || 'Banvum Tamale'}</Text>
           <Text style={styles.rating}>★★★★★  <Text style={styles.ratingCopy}>0.0   (0 reviews)</Text></Text>
           <View style={styles.contactRow}><Pressable style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable></View>
         </View>
@@ -26,7 +28,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor }: { onBack:
         <View style={styles.section}>
           <View style={styles.specGrid}>{specifications.map(([label, value]) => <View key={label} style={styles.spec}><Text style={styles.specValue}>{value}</Text><Text style={styles.specLabel}>{label}</Text></View>)}</View>
           <Text style={styles.heading}>Description</Text>
-          <Text style={styles.description}>The Nasco NASF2-10FL 76 Liter Table Top Fridge gives you the extra storage you need for food and beverages. Its compact size complements most spaces smoothly.</Text>
+          <Text style={styles.description}>{listing?.description || 'The Nasco NASF2-10FL 76 Liter Table Top Fridge gives you the extra storage you need for food and beverages. Its compact size complements most spaces smoothly.'}</Text>
           <Text style={styles.heading}>Select Delivery Method</Text>
           <View style={styles.deliveryRow}><View style={styles.delivery}><Text style={styles.deliveryIcon}>▣</Text><View><Text style={styles.deliveryTitle}>In-store Pickup</Text><Text style={styles.deliveryCopy}>Available Now</Text></View></View><View style={styles.delivery}><Text style={styles.deliveryIcon}>▤</Text><View><Text style={styles.deliveryTitle}>Local Delivery</Text><Text style={styles.deliveryCopy}>Delivery fee may apply</Text></View></View></View>
         </View>

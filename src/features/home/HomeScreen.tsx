@@ -115,7 +115,7 @@ function SectionHeader({
   );
 }
 
-export function HomeScreen({ displayName, onOpenHotSelling }: { displayName?: string | null; onOpenHotSelling?: () => void }) {
+export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing }: { displayName?: string | null; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
@@ -185,7 +185,7 @@ export function HomeScreen({ displayName, onOpenHotSelling }: { displayName?: st
         showsHorizontalScrollIndicator={false}
       >
         {localListings.map((listing) => (
-          <Pressable key={listing.id} accessibilityRole="button" onPress={onOpenHotSelling}>
+          <Pressable key={listing.id} accessibilityRole="button" onPress={() => onOpenListing?.(listing)}>
             <Image
               accessibilityLabel={`${listing.title} listing`}
               resizeMode="contain"
