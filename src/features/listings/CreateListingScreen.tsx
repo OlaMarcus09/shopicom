@@ -32,9 +32,9 @@ function SelectField({ label, value, options, onChange }: { label?: string; valu
   );
 }
 
-function Choice({ active, label, square = false }: { active: boolean; label: string; square?: boolean }) {
+function Choice({ active, label, square = false, onPress }: { active: boolean; label: string; square?: boolean; onPress: () => void }) {
   return (
-    <Pressable style={styles.choice}>
+    <Pressable onPress={onPress} style={styles.choice}>
       <View style={[square ? styles.checkbox : styles.radio, active && styles.choiceActive]}>
         {active ? <Text style={styles.check}>✓</Text> : null}
       </View>
@@ -56,6 +56,8 @@ export function CreateListingScreen() {
   const [subCategory, setSubCategory] = useState('Select Sub-Category');
   const [type, setType] = useState('Select Type');
   const [condition, setCondition] = useState('New');
+  const [deliveryOptions, setDeliveryOptions] = useState<Array<'in_store_pickup' | 'local_delivery'>>(['in_store_pickup']);
+  const [negotiation, setNegotiation] = useState<'yes' | 'no' | 'not_sure'>('not_sure');
 
   async function selectImages() {
     setStatusMessage(null);
@@ -103,8 +105,8 @@ export function CreateListingScreen() {
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
         location: location.trim(),
-        deliveryOptions: ['in_store_pickup'],
-        negotiation: 'not_sure',
+        deliveryOptions,
+        negotiation,
         description: description.trim(),
         imageUrls: imageUris,
       }, currentUser);
@@ -173,10 +175,10 @@ export function CreateListingScreen() {
           <View style={styles.locationField}><Text style={styles.pin}>⌖</Text><TextInput onChangeText={setLocation} placeholder="Business Location" placeholderTextColor="#999" style={styles.locationInput} value={location} /></View>
 
           <Text style={styles.sectionTitle}>Delivery Options</Text>
-          <View style={styles.choiceRow}><Choice active label="In-store Pickup" square /><Choice active={false} label="Local Delivery" square /></View>
+          <View style={styles.choiceRow}><Choice active={deliveryOptions.includes('in_store_pickup')} label="In-store Pickup" square onPress={() => setDeliveryOptions((current) => current.includes('in_store_pickup') ? current.filter((item) => item !== 'in_store_pickup') : [...current, 'in_store_pickup'])} /><Choice active={deliveryOptions.includes('local_delivery')} label="Local Delivery" square onPress={() => setDeliveryOptions((current) => current.includes('local_delivery') ? current.filter((item) => item !== 'local_delivery') : [...current, 'local_delivery'])} /></View>
 
           <Text style={styles.sectionTitle}>Are you open to negotiation?</Text>
-          <View style={styles.choiceRow}><Choice active={false} label="Yes" /><Choice active={false} label="No" /><Choice active label="Not sure" /></View>
+          <View style={styles.choiceRow}><Choice active={negotiation === 'yes'} label="Yes" onPress={() => setNegotiation('yes')} /><Choice active={negotiation === 'no'} label="No" onPress={() => setNegotiation('no')} /><Choice active={negotiation === 'not_sure'} label="Not sure" onPress={() => setNegotiation('not_sure')} /></View>
 
           <Text style={[styles.label, styles.descriptionLabel]}>Description*</Text>
           <TextInput
