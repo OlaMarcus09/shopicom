@@ -115,7 +115,7 @@ function SectionHeader({
   );
 }
 
-export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenSearch?: () => void }) {
+export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenNotifications?: () => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
@@ -151,7 +151,7 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
           accessibilityLabel="Notifications"
           accessibilityRole="button"
           hitSlop={8}
-          onPress={() => undefined}
+          onPress={onOpenNotifications}
           style={styles.notificationButton}
         >
           <BellIcon />

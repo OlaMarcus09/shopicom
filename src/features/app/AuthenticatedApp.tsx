@@ -23,9 +23,10 @@ import type { LocalListing } from '../listings/local-listing-service';
 import { MyListingsScreen } from '../listings/MyListingsScreen';
 import { SearchListingsScreen } from '../listings/SearchListingsScreen';
 import { FavoritesScreen } from '../listings/FavoritesScreen';
+import { NotificationsScreen } from '../notifications/NotificationsScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
-type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'search';
+type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search';
 
 const tabs: Array<{ key: AppTab; label: string }> = [
   { key: 'add', label: 'Add' },
@@ -186,6 +187,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [listingOrigin, setListingOrigin] = useState<ListingOrigin>('home');
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   function openListing(listing: LocalListing | undefined, origin: ListingOrigin) {
     setSelectedListing(listing);
@@ -194,6 +196,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     setIsSearchOpen(false);
     setIsMyListingsOpen(false);
     setIsHotSellingOpen(false);
+    setIsNotificationsOpen(false);
     setIsListingOpen(true);
   }
 
@@ -204,10 +207,13 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     if (listingOrigin === 'search') setIsSearchOpen(true);
     if (listingOrigin === 'my-listings') setIsMyListingsOpen(true);
     if (listingOrigin === 'hot-selling') setIsHotSellingOpen(true);
+    if (listingOrigin === 'notifications') setIsNotificationsOpen(true);
   }
 
   let screen;
-  if (isFavoritesOpen) {
+  if (isNotificationsOpen) {
+    screen = <NotificationsScreen onBack={() => setIsNotificationsOpen(false)} onOpenListing={(listing) => openListing(listing, 'notifications')} />;
+  } else if (isFavoritesOpen) {
     screen = <FavoritesScreen onBack={() => setIsFavoritesOpen(false)} onOpenListing={(listing) => openListing(listing, 'favorites')} />;
   } else if (isSearchOpen) {
     screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => openListing(listing, 'search')} />;
@@ -222,7 +228,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen onClose={() => setActiveTab('home')} />;
   } else if (activeTab === 'categories') {
@@ -238,7 +244,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
