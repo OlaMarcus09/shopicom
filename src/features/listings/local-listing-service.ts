@@ -64,3 +64,11 @@ export async function getFavoriteListings() {
   const [listings, ids] = await Promise.all([getLocalListings(), getFavoriteListingIds()]);
   return listings.filter((listing) => ids.includes(listing.id));
 }
+
+export async function deleteLocalListing(listingId: string) {
+  const [listings, favoriteIds] = await Promise.all([getLocalListings(), getFavoriteListingIds()]);
+  await Promise.all([
+    AsyncStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(listings.filter((listing) => listing.id !== listingId))),
+    AsyncStorage.setItem(LOCAL_FAVORITES_KEY, JSON.stringify(favoriteIds.filter((id) => id !== listingId))),
+  ]);
+}
