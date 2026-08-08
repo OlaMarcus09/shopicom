@@ -184,7 +184,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isListingOpen) {
     screen = <ListingDetailsScreen listing={selectedListing} onBack={() => { setSelectedListing(undefined); setIsListingOpen(false); }} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
-    screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={() => setIsListingOpen(true)} />;
+    screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={(listing) => { setSelectedListing(listing); setIsHotSellingOpen(false); setIsListingOpen(true); }} />;
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {

@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+
+import { getLocalListings, type LocalListing } from './local-listing-service';
 
 const products = [
   require('../../../assets/listings/product-card-smart-watch.png'),
@@ -9,10 +12,12 @@ const products = [
   require('../../../assets/home/product-card-sneakers.png'),
 ];
 
-export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void; onOpenProduct: () => void }) {
+export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void; onOpenProduct: (listing?: LocalListing) => void }) {
+  const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const cardWidth = (width - 42) / 2;
   const cardHeight = cardWidth * (550 / 376);
+  useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
 
   return (
     <View style={styles.screen}>
@@ -22,8 +27,13 @@ export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void
         <Text style={styles.fire}>🔥</Text>
       </View>
       <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
+        {localListings.map((listing) => (
+          <Pressable key={listing.id} onPress={() => onOpenProduct(listing)} style={styles.cardButton}>
+            <Image accessibilityLabel={`${listing.title} listing`} resizeMode="contain" source={{ uri: listing.imageUrls[0] }} style={{ width: cardWidth, height: cardHeight }} />
+          </Pressable>
+        ))}
         {products.map((source, index) => (
-          <Pressable key={index} onPress={onOpenProduct} style={styles.cardButton}>
+          <Pressable key={index} onPress={() => onOpenProduct()} style={styles.cardButton}>
             <Image resizeMode="contain" source={source} style={{ width: cardWidth, height: cardHeight }} />
           </Pressable>
         ))}
