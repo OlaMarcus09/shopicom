@@ -14,6 +14,20 @@ import {
 import { firebaseAuth } from '../../services/firebase';
 import { saveLocalListing } from './local-listing-service';
 
+const categoryOptions = ['Electronics', 'Fashion', 'Home & Garden', 'Vehicles'];
+const subCategoryOptions: Record<string, string[]> = {
+  Electronics: ['Smart Watches', 'Phones', 'Computers', 'Accessories', 'Television'],
+  Fashion: ["Men's Fashion", "Women's Fashion", 'Shoes', 'Bags & Accessories'],
+  'Home & Garden': ['Furniture', 'Home Appliances', 'Kitchen & Dining', 'Garden'],
+  Vehicles: ['Cars', 'Motorcycles', 'Vehicle Parts', 'Buses & Trucks'],
+};
+const typeOptions: Record<string, string[]> = {
+  'Smart Watches': ['Fitness Watch', 'Luxury Watch', 'Kids Watch'], Phones: ['Smartphone', 'Feature Phone'], Computers: ['Laptop', 'Desktop'], Accessories: ['Chargers', 'Headphones', 'Cases'], Television: ['Smart TV', 'LED TV'],
+  "Men's Fashion": ['Clothing', 'Footwear'], "Women's Fashion": ['Clothing', 'Footwear'], Shoes: ['Sneakers', 'Formal Shoes', 'Sandals'], 'Bags & Accessories': ['Handbag', 'Backpack', 'Jewelry'],
+  Furniture: ['Sofa', 'Bed', 'Table'], 'Home Appliances': ['Refrigerator', 'Washing Machine', 'Air Conditioner'], 'Kitchen & Dining': ['Cookware', 'Kitchen Appliance'], Garden: ['Garden Tools', 'Outdoor Furniture'],
+  Cars: ['Sedan', 'SUV', 'Pickup'], Motorcycles: ['Motorbike', 'Scooter'], 'Vehicle Parts': ['Engine Parts', 'Tyres', 'Accessories'], 'Buses & Trucks': ['Bus', 'Truck'],
+};
+
 function SelectField({ label, value, options, onChange }: { label?: string; value: string; options: string[]; onChange: (value: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
@@ -86,8 +100,8 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   async function submitListing() {
     setStatusMessage(null);
 
-    if (imageUris.length === 0 || title.trim().length < 3 || !price || !location.trim() || !description.trim()) {
-      setStatusMessage('Add a photo, title, price, location, and description.');
+    if (imageUris.length === 0 || title.trim().length < 3 || category === 'Select Category' || subCategory === 'Select Sub-Category' || !price || !location.trim() || !description.trim()) {
+      setStatusMessage('Add a photo, title, category, sub-category, price, location, and description.');
       return;
     }
 
@@ -101,8 +115,8 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
       setIsPosting(true);
       await saveLocalListing({
         title: title.trim(),
-        category: category === 'Select Category' ? 'Electronics' : category,
-        subCategory: subCategory === 'Select Sub-Category' ? 'Smart Watches' : subCategory,
+        category,
+        subCategory,
         type: specType.trim() || (type === 'Select Type' ? undefined : type),
         brand: brand.trim() || undefined,
         condition,
@@ -158,9 +172,9 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
           ) : null}
 
           <TextInput onChangeText={setTitle} placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} value={title} />
-          <SelectField label="Category*" value={category} options={['Electronics', 'Fashion', 'Home & Garden', 'Vehicles']} onChange={setCategory} />
-          <SelectField label="Sub-Category*" value={subCategory} options={['Smart Watches', 'Phones', 'Computers', 'Accessories']} onChange={setSubCategory} />
-          <SelectField label="Type" value={type} options={['Smart Watch', 'Phone', 'Tablet', 'Laptop']} onChange={setType} />
+          <SelectField label="Category*" value={category} options={categoryOptions} onChange={(value) => { setCategory(value); setSubCategory('Select Sub-Category'); setType('Select Type'); }} />
+          <SelectField label="Sub-Category*" value={subCategory} options={subCategoryOptions[category] || []} onChange={(value) => { setSubCategory(value); setType('Select Type'); }} />
+          <SelectField label="Type" value={type} options={typeOptions[subCategory] || []} onChange={setType} />
 
           <Text style={styles.sectionTitle}>Specifications</Text>
           <View style={styles.row}>
