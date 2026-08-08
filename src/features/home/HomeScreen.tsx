@@ -213,11 +213,12 @@ export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing }: { d
       </ScrollView>
 
       <SectionHeader suffix="⌖">Best Selling Near</SectionHeader>
-      <View style={styles.nearbyPlaceholder}>
-        <Text style={styles.nearbyPlaceholderText}>
-          Nearby listings will load here.
-        </Text>
-      </View>
+      {localListings.length ? <ScrollView horizontal contentContainerStyle={styles.nearbyRow} showsHorizontalScrollIndicator={false}>
+        {localListings.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing?.(listing)} style={styles.nearbyCard}>
+          <Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.nearbyImage} />
+          <View style={styles.nearbyCopy}><Text numberOfLines={1} style={styles.nearbyName}>{listing.title}</Text><Text style={styles.nearbyPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.nearbyLocation}>⌖ {listing.location}</Text></View>
+        </Pressable>)}
+      </ScrollView> : <View style={styles.nearbyPlaceholder}><Text style={styles.nearbyPlaceholderText}>No nearby listings yet.</Text></View>}
     </ScrollView>
   );
 }
@@ -484,6 +485,13 @@ const styles = StyleSheet.create({
     color: '#737373',
     fontSize: 14,
   },
+  nearbyRow: { gap: 10, paddingHorizontal: 16, paddingTop: 12 },
+  nearbyCard: { width: 170, overflow: 'hidden', borderWidth: 1, borderColor: '#EEE', borderRadius: 13, backgroundColor: '#FFF' },
+  nearbyImage: { width: 170, height: 108, backgroundColor: '#F7F7F7' },
+  nearbyCopy: { padding: 9 },
+  nearbyName: { color: '#222', fontSize: 12, fontWeight: '700' },
+  nearbyPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', marginTop: 4 },
+  nearbyLocation: { color: '#777', fontSize: 10, marginTop: 4 },
   pressed: {
     opacity: 0.8,
   },
