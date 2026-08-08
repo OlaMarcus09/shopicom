@@ -115,7 +115,7 @@ function SectionHeader({
   );
 }
 
-export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing }: { displayName?: string | null; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void }) {
+export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing, onOpenSearch }: { displayName?: string | null; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
@@ -138,7 +138,7 @@ export function HomeScreen({ displayName, onOpenHotSelling, onOpenListing }: { d
         <Pressable
           accessibilityLabel="Search listings"
           accessibilityRole="button"
-          onPress={() => undefined}
+          onPress={onOpenSearch}
           style={styles.searchButton}
         >
           <SearchIcon />

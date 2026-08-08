@@ -21,6 +21,7 @@ import { VendorStorefrontScreen } from '../listings/VendorStorefrontScreen';
 import { ProfileDetailsScreen } from '../profile/ProfileDetailsScreen';
 import type { LocalListing } from '../listings/local-listing-service';
 import { MyListingsScreen } from '../listings/MyListingsScreen';
+import { SearchListingsScreen } from '../listings/SearchListingsScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 
@@ -179,9 +180,12 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isVendorOpen, setIsVendorOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<LocalListing | undefined>();
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   let screen;
-  if (isMyListingsOpen) {
+  if (isSearchOpen) {
+    screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsSearchOpen(false); setIsListingOpen(true); }} />;
+  } else if (isMyListingsOpen) {
     screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => { setSelectedListing(listing); setIsMyListingsOpen(false); setIsListingOpen(true); }} />;
   } else if (isVendorOpen) {
     screen = <VendorStorefrontScreen onBack={() => setIsVendorOpen(false)} onOpenProduct={() => setIsVendorOpen(false)} />;
@@ -192,7 +196,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => { setSelectedListing(listing); setIsListingOpen(true); }} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen />;
   } else if (activeTab === 'categories') {
@@ -208,7 +212,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
