@@ -1,8 +1,12 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
 
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
+  const imageSources = listing?.imageUrls.length ? listing.imageUrls.map((uri) => ({ uri })) : [imageSource];
+  const [activeImage, setActiveImage] = useState(0);
+  const { width } = useWindowDimensions();
   const specifications = listing ? [
     ['Type', listing.type || listing.subCategory],
     ...(listing.brand ? [['Brand', listing.brand] as [string, string]] : []),
@@ -18,8 +22,10 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Text style={styles.share}>⌯</Text><Text style={styles.heart}>♡</Text></View></View>
-        <Image resizeMode="contain" source={imageSource} style={styles.hero} />
-        <View style={styles.counter}><Text style={styles.counterText}>1/14</Text></View>
+        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(event) => setActiveImage(Math.round(event.nativeEvent.contentOffset.x / width))}>
+          {imageSources.map((source, index) => <Image key={index} resizeMode="contain" source={source} style={[styles.hero, { width }]} />)}
+        </ScrollView>
+        <View style={styles.counter}><Text style={styles.counterText}>{activeImage + 1}/{imageSources.length}</Text></View>
 
         <View style={styles.section}>
           <Text style={styles.title}>{listing?.title || 'Ultra smart watch'}</Text>
