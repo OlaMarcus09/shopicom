@@ -1,10 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-const conversations = [
-  { name: 'Sample Store', message: 'Hello', time: '11:47pm', image: require('../../../assets/home/product-card-sneakers.png'), initial: 'A', color: '#403A3A', verified: true, unread: true, spam: false },
-  { name: 'Sample Store 2', message: 'Hi', time: '06:14pm', image: require('../../../assets/home/product-card-watch.png'), initial: 'D', color: '#FF3428', verified: false, unread: false, spam: false },
-];
+const conversations: Array<{ name: string; message: string; time: string; image: number; initial: string; color: string; verified: boolean; unread: boolean; spam: boolean }> = [];
 
 type InboxTab = 'All' | 'Unread' | 'Spam';
 
