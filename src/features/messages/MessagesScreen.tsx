@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-
-const conversations: Array<{ name: string; message: string; time: string; image: number; initial: string; color: string; verified: boolean; unread: boolean; spam: boolean }> = [];
+import { getLocalChatMessages } from './local-chat-service';
 
 type InboxTab = 'All' | 'Unread' | 'Spam';
 
 export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => void; onOpenConversation: () => void }) {
   const [activeTab, setActiveTab] = useState<InboxTab>('All');
   const [query, setQuery] = useState('');
+  const [hasMessages, setHasMessages] = useState(false);
+  useEffect(() => { getLocalChatMessages().then((messages) => setHasMessages(messages.length > 0)).catch(() => setHasMessages(false)); }, []);
+  const conversations = hasMessages ? [{ name: 'Shopicom seller', message: 'Local conversation', time: 'now', image: 0, initial: 'S', color: '#F45100', verified: false, unread: true, spam: false }] : [];
   const filteredConversations = useMemo(() => conversations.filter((item) => {
     const matchesTab = activeTab === 'All' || (activeTab === 'Unread' && item.unread) || (activeTab === 'Spam' && item.spam);
     const term = query.trim().toLowerCase();

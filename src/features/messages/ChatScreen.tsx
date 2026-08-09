@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,14 +10,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { getLocalChatMessages, saveLocalChatMessage, type LocalChatMessage } from './local-chat-service';
 
 export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewItem: () => void }) {
   const [draft, setDraft] = useState('');
-  const [messages, setMessages] = useState<Array<{ id: number; text: string }>>([]);
-  function sendMessage() {
+  const [messages, setMessages] = useState<LocalChatMessage[]>([]);
+  useEffect(() => { getLocalChatMessages().then(setMessages).catch(() => setMessages([])); }, []);
+  async function sendMessage() {
     const text = draft.trim();
     if (!text) return;
-    setMessages((current) => [...current, { id: Date.now(), text }]);
+    const message = await saveLocalChatMessage(text);
+    setMessages((current) => [...current, message]);
     setDraft('');
   }
   return (
