@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 
 import { getLocalProfile, type LocalProfile } from './local-profile-service';
 
-type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; user: User };
+type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; onOpenVendorOnboarding: () => void; user: User };
 
 const accountItems = ['My Listings', 'Become a Vendor', 'Favorites', 'Edit Profile', 'Privacy & Security'];
 const supportItems = ['Help & Support', 'Terms and Policies', 'App Settings'];
@@ -14,7 +14,7 @@ function MenuCard({ items, onPressItem }: { items: string[]; onPressItem?: (item
   return <View style={styles.menuCard}>{items.map((item) => <Pressable key={item} onPress={() => onPressItem?.(item)} style={styles.menuItem}><Text style={styles.menuIcon}>○</Text><Text style={styles.menuLabel}>{item}</Text><Text style={styles.arrow}>›</Text></Pressable>)}</View>;
 }
 
-export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenEditProfile, onOpenFavorites, onOpenMyListings, user }: Props) {
+export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenEditProfile, onOpenFavorites, onOpenMyListings, onOpenVendorOnboarding, user }: Props) {
   const [profile, setProfile] = useState<LocalProfile | null>(null);
   useEffect(() => { getLocalProfile(user.uid).then(setProfile).catch(() => setProfile(null)); }, [user.uid]);
   const displayName = profile?.displayName || user.displayName || 'Shopicom User';
@@ -23,7 +23,7 @@ export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onO
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}><Text style={styles.headerTitle}>Profile</Text><Text style={styles.share}>⌯</Text></View>
       <View style={styles.profile}><View style={styles.avatar}><Text style={styles.avatarText}>{initial}</Text></View><Text style={styles.name}>{displayName}</Text><Text style={styles.id}>{user.email || 'Account'}</Text><Text style={styles.location}>⌖  {profile?.location || 'Area, City'}</Text><View style={styles.stats}><Text><Text style={styles.statOrange}>0 </Text>Followers</Text><Text><Text style={styles.statOrange}>0.0 </Text>Ratings(0)</Text><Text><Text style={styles.statOrange}>0 </Text>Following</Text></View><Text style={styles.bio}>{profile?.bio || 'No bio yet. Tell others about yourself'}</Text></View>
-      <Text style={styles.groupTitle}>ACCOUNT</Text><MenuCard items={accountItems} onPressItem={(item) => { if (item === 'My Listings') onOpenMyListings(); if (item === 'Favorites') onOpenFavorites(); if (item === 'Edit Profile') onOpenEditProfile(); }} />
+      <Text style={styles.groupTitle}>ACCOUNT</Text><MenuCard items={accountItems} onPressItem={(item) => { if (item === 'My Listings') onOpenMyListings(); if (item === 'Favorites') onOpenFavorites(); if (item === 'Edit Profile') onOpenEditProfile(); if (item === 'Become a Vendor') onOpenVendorOnboarding(); }} />
       <Text style={styles.groupTitle}>SUPPORT & APP</Text><MenuCard items={supportItems} />
       <Text style={styles.groupTitle}>ABOUT</Text><MenuCard items={aboutItems} />
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
