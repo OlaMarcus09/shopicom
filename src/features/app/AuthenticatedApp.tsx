@@ -236,7 +236,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isChatOpen) {
     screen = <ChatScreen onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenProfile={() => setActiveTab('profile')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen onClose={() => setActiveTab('home')} />;
   } else if (activeTab === 'categories') {
