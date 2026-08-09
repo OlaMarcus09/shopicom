@@ -13,8 +13,6 @@ import { getLocalListings, type LocalListing } from '../listings/local-listing-s
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
-  sneakers: require('../../../assets/home/product-card-sneakers.png'),
-  watch: require('../../../assets/home/product-card-watch.png'),
 };
 
 type CategoryKind = 'food' | 'hotels' | 'services';
@@ -196,22 +194,7 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
             <Text style={styles.localProductPrice}>GHS {listing.price}</Text>
           </Pressable>
         ))}
-        <Pressable accessibilityRole="button" onPress={() => undefined}>
-          <Image
-            accessibilityLabel="White sneakers listing"
-            resizeMode="contain"
-            source={homeAssets.sneakers}
-            style={[styles.productCard, { width: productWidth, height: productHeight }]}
-          />
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => undefined}>
-          <Image
-            accessibilityLabel="Black watch listing"
-            resizeMode="contain"
-            source={homeAssets.watch}
-            style={[styles.productCard, { width: productWidth, height: productHeight }]}
-          />
-        </Pressable>
+        {!localListings.length ? <Text style={styles.emptyProducts}>No products posted yet.</Text> : null}
       </ScrollView>
 
       <SectionHeader suffix="⌖">Best Selling Near</SectionHeader>
@@ -474,6 +457,7 @@ const styles = StyleSheet.create({
   productCard: {
     resizeMode: 'contain',
   },
+  emptyProducts: { color: '#777', fontSize: 13, paddingHorizontal: 5, paddingVertical: 35 },
   localProductCard: { overflow: 'hidden', borderWidth: 1, borderColor: '#EEE', borderRadius: 13, backgroundColor: '#FFF', paddingBottom: 8 },
   localProductTitle: { color: '#222', fontSize: 12, fontWeight: '700', paddingHorizontal: 8, marginTop: 5 },
   localProductPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', paddingHorizontal: 8, marginTop: 3 },

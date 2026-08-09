@@ -3,15 +3,6 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, Vi
 
 import { getLocalListings, type LocalListing } from './local-listing-service';
 
-const products = [
-  require('../../../assets/listings/product-card-smart-watch.png'),
-  require('../../../assets/home/product-card-sneakers.png'),
-  require('../../../assets/home/product-card-sneakers.png'),
-  require('../../../assets/listings/product-card-smart-watch.png'),
-  require('../../../assets/listings/product-card-smart-watch.png'),
-  require('../../../assets/home/product-card-sneakers.png'),
-];
-
 export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void; onOpenProduct: (listing?: LocalListing) => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
@@ -34,11 +25,7 @@ export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void
             <Text style={styles.localPrice}>GHS {listing.price}</Text>
           </Pressable>
         ))}
-        {products.map((source, index) => (
-          <Pressable key={index} onPress={() => onOpenProduct()} style={styles.cardButton}>
-            <Image resizeMode="contain" source={source} style={{ width: cardWidth, height: cardHeight }} />
-          </Pressable>
-        ))}
+        {!localListings.length ? <View style={styles.empty}><Text style={styles.emptyTitle}>No products yet</Text><Text style={styles.emptyCopy}>Posted listings will appear here.</Text></View> : null}
       </ScrollView>
     </View>
   );
@@ -54,4 +41,5 @@ const styles = StyleSheet.create({
   cardButton: { borderRadius: 16, backgroundColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 5, elevation: 2 },
   localTitle: { color: '#222', fontSize: 12, fontWeight: '700', paddingHorizontal: 8, marginTop: 5 },
   localPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', paddingHorizontal: 8, paddingBottom: 8, marginTop: 3 },
+  empty: { width: '100%', alignItems: 'center', paddingTop: 100 }, emptyTitle: { color: '#222', fontSize: 17, fontWeight: '700' }, emptyCopy: { color: '#777', fontSize: 12, marginTop: 7 },
 });
