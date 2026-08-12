@@ -11,15 +11,17 @@ import {
   View,
 } from 'react-native';
 import { getLocalChatMessages, saveLocalChatMessage, type LocalChatMessage } from './local-chat-service';
+import { getCloudChatMessages, saveCloudChatMessage } from './cloud-chat-service';
 
 export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewItem: () => void }) {
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<LocalChatMessage[]>([]);
-  useEffect(() => { getLocalChatMessages().then(setMessages).catch(() => setMessages([])); }, []);
+  useEffect(() => { Promise.all([getLocalChatMessages(), getCloudChatMessages().catch(() => [])]).then(([local, cloud]) => setMessages(cloud.length ? cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() })) : local)).catch(() => setMessages([])); }, []);
   async function sendMessage() {
     const text = draft.trim();
     if (!text) return;
     const message = await saveLocalChatMessage(text);
+    saveCloudChatMessage(text).catch(() => undefined);
     setMessages((current) => [...current, message]);
     setDraft('');
   }

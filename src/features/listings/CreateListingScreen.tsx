@@ -13,6 +13,7 @@ import {
 
 import { firebaseAuth } from '../../services/firebase';
 import { saveLocalListing } from './local-listing-service';
+import { createListing } from './listing-service';
 
 const categoryOptions = ['Electronics', 'Fashion', 'Home & Garden', 'Vehicles'];
 const subCategoryOptions: Record<string, string[]> = {
@@ -113,7 +114,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
 
     try {
       setIsPosting(true);
-      await saveLocalListing({
+      const listingInput = {
         title: title.trim(),
         category,
         subCategory,
@@ -128,8 +129,14 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         negotiation,
         description: description.trim(),
         imageUrls: imageUris,
-      }, currentUser);
-      setStatusMessage('Listing saved on this device.');
+      };
+      await saveLocalListing(listingInput, currentUser);
+      try {
+        await createListing({ ...listingInput, imageUrls: [] });
+        setStatusMessage('Listing saved on this device and synced to your account.');
+      } catch {
+        setStatusMessage('Listing saved on this device. Cloud sync will retry later.');
+      }
       setTitle('');
       setPrice('');
       setDiscount('');
