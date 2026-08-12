@@ -12,16 +12,17 @@ import {
 } from 'react-native';
 import { getLocalChatMessages, saveLocalChatMessage, type LocalChatMessage } from './local-chat-service';
 import { getCloudChatMessages, saveCloudChatMessage } from './cloud-chat-service';
+import type { LocalListing } from '../listings/local-listing-service';
 
-export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewItem: () => void }) {
+export function ChatScreen({ listing, onBack, onViewItem }: { listing?: LocalListing; onBack: () => void; onViewItem: () => void }) {
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<LocalChatMessage[]>([]);
-  useEffect(() => { Promise.all([getLocalChatMessages(), getCloudChatMessages().catch(() => [])]).then(([local, cloud]) => setMessages(cloud.length ? cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() })) : local)).catch(() => setMessages([])); }, []);
+  useEffect(() => { Promise.all([getLocalChatMessages(), getCloudChatMessages(listing).catch(() => [])]).then(([local, cloud]) => setMessages(cloud.length ? cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() })) : local)).catch(() => setMessages([])); }, [listing]);
   async function sendMessage() {
     const text = draft.trim();
     if (!text) return;
     const message = await saveLocalChatMessage(text);
-    saveCloudChatMessage(text).catch(() => undefined);
+    saveCloudChatMessage(text, listing).catch(() => undefined);
     setMessages((current) => [...current, message]);
     setDraft('');
   }
@@ -34,17 +35,16 @@ export function ChatScreen({ onBack, onViewItem }: { onBack: () => void; onViewI
       <View style={styles.header}>
         <View style={styles.topRow}>
           <Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable>
-          <View style={styles.avatar}><Text style={styles.avatarText}>C</Text></View>
-          <View style={styles.store}><Text style={styles.storeName}>Sample Store</Text><Text style={styles.online}>Online</Text></View>
+          <View style={styles.avatar}><Text style={styles.avatarText}>{(listing?.sellerName || 'S').charAt(0).toUpperCase()}</Text></View>
+          <View style={styles.store}><Text style={styles.storeName}>{listing?.sellerName || 'Shopicom seller'}</Text><Text style={styles.online}>Online</Text></View>
           <Text style={styles.menu}>⋮</Text>
         </View>
-        <View style={styles.regarding}><Text style={styles.regardingText}>Regarding: Men casual sneakers</Text><Pressable onPress={onViewItem} style={styles.viewItem}><Text style={styles.viewItemText}>View item</Text></Pressable></View>
+        <View style={styles.regarding}><Text numberOfLines={1} style={styles.regardingText}>Regarding: {listing?.title || 'Product listing'}</Text><Pressable onPress={onViewItem} style={styles.viewItem}><Text style={styles.viewItemText}>View item</Text></Pressable></View>
       </View>
 
       <ScrollView contentContainerStyle={styles.chatBody} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.advice}><Text style={styles.warning}>!</Text><View style={styles.adviceCopy}><Text style={styles.adviceTitle}>SECURITY ADVICE</Text><Text style={styles.adviceText}>To avoid scams, do not pay in advance for delivery. Shopicom will not be responsible for any loss.</Text></View></View>
-        <Text style={styles.day}>Yesterday</Text>
-        <View style={styles.message}><Text style={styles.messageText}>Hello</Text><Text style={styles.messageTime}>11:47 pm ✓</Text></View>
+        <Text style={styles.day}>Messages</Text>
         {messages.map((message) => <View key={message.id} style={styles.message}><Text style={styles.messageText}>{message.text}</Text><Text style={styles.messageTime}>Now ✓</Text></View>)}
       </ScrollView>
 

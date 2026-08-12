@@ -93,12 +93,12 @@ export function MarketplaceProductCard({
       ]}
     >
       <View style={[styles.imageFrame, { height: imageHeight }]}>
-        <Image
+        {listing.imageUrls[0] ? <Image
           accessibilityLabel={`${listing.title} product image`}
           resizeMode="cover"
           source={{ uri: listing.imageUrls[0] }}
           style={styles.image}
-        />
+        /> : <View style={styles.missingImage}><Text style={styles.missingImageText}>Photo unavailable</Text></View>}
 
         {choiceBadge ? (
           <View style={styles.choiceBadge}>
@@ -186,6 +186,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  missingImage: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F3F3F3' },
+  missingImageText: { color: '#888', fontSize: 11, fontWeight: '600' },
   choiceBadge: {
     position: 'absolute',
     left: 7,

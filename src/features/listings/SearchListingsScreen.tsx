@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { getLocalListings, type LocalListing } from './local-listing-service';
+import type { LocalListing } from './local-listing-service';
+import { getCombinedListings } from './listing-service';
 
 export function SearchListingsScreen({ onBack, onOpenListing }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void }) {
   const [query, setQuery] = useState('');
   const [listings, setListings] = useState<LocalListing[]>([]);
-  useEffect(() => { getLocalListings().then(setListings).catch(() => setListings([])); }, []);
+  useEffect(() => { getCombinedListings().then(setListings).catch(() => setListings([])); }, []);
 
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();

@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { getLocalListings, type LocalListing } from '../listings/local-listing-service';
+import type { LocalListing } from '../listings/local-listing-service';
+import { getCombinedListings } from '../listings/listing-service';
 import { MarketplaceProductCard } from '../listings/MarketplaceProductCard';
 
 const homeAssets = {
@@ -137,7 +138,7 @@ function SectionHeader({
 export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenProfile, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenNotifications?: () => void; onOpenProfile?: () => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   const [discoveryFilter, setDiscoveryFilter] = useState<DiscoveryFilter>('Recommend');
-  useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
+  useEffect(() => { getCombinedListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
   const promoWidth = Math.max(screenWidth - 28, 0);

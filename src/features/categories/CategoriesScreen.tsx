@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getLocalListings, type LocalListing } from '../listings/local-listing-service';
+import type { LocalListing } from '../listings/local-listing-service';
+import { getCombinedListings } from '../listings/listing-service';
 
 const groups = [
   { label: 'Trending', icon: '✦', color: '#FFF0E8' },
@@ -31,7 +32,7 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
   const [listings, setListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const sidebarWidth = Math.min(116, width * 0.3);
-  useEffect(() => { getLocalListings().then(setListings).catch(() => setListings([])); }, []);
+  useEffect(() => { getCombinedListings().then(setListings).catch(() => setListings([])); }, []);
   const matches = useMemo(() => {
     if (selected === 'Recommend' || selected === 'Trending') return listings;
     const term = selected.toLowerCase().replace('mobile ', '').replace(' & tablets', '').replace('laptops & ', '');

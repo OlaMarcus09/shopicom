@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { getLocalListings, type LocalListing } from './local-listing-service';
+import type { LocalListing } from './local-listing-service';
+import { getCombinedListings } from './listing-service';
 
 export function HotSellingScreen({ onBack, onOpenProduct }: { onBack: () => void; onOpenProduct: (listing?: LocalListing) => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const cardWidth = (width - 42) / 2;
   const cardHeight = cardWidth * (550 / 376);
-  useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
+  useEffect(() => { getCombinedListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
 
   return (
     <View style={styles.screen}>

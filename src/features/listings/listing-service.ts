@@ -11,6 +11,8 @@ import {
 
 import { firebaseAuth, firebaseDb } from '../../services/firebase';
 import type { CreateListingInput, MarketplaceListing } from './listing-types';
+import type { LocalListing } from './local-listing-service';
+import { getLocalListings } from './local-listing-service';
 
 const listingsCollection = collection(firebaseDb, 'listings');
 
@@ -46,4 +48,20 @@ export async function getLatestListings(maximum = 20) {
     id: document.id,
     ...document.data(),
   })) as MarketplaceListing[];
+}
+
+export async function getCombinedListings(maximum = 20): Promise<LocalListing[]> {
+  const local = await getLocalListings();
+  try {
+    const cloud = await getLatestListings(maximum);
+    const localCloudKeys = new Set(local.map((item) => `${item.sellerId}:${item.title}:${item.price}`));
+    const cloudOnly = cloud.filter((item) => !localCloudKeys.has(`${item.sellerId}:${item.title}:${item.price}`)).map((item) => ({
+      ...item,
+      createdAt: item.createdAt?.toDate().toISOString() || new Date().toISOString(),
+      status: 'active' as const,
+    }));
+    return [...local, ...cloudOnly];
+  } catch {
+    return local;
+  }
 }
