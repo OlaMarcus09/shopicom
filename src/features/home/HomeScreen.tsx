@@ -10,17 +10,28 @@ import {
 import { useEffect, useState } from 'react';
 
 import { getLocalListings, type LocalListing } from '../listings/local-listing-service';
+import { MarketplaceProductCard } from '../listings/MarketplaceProductCard';
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
 };
 
-type CategoryKind = 'food' | 'hotels' | 'services';
+type CategoryKind = 'food' | 'hotels' | 'services' | 'jobs';
+
+type DiscoveryFilter = 'Recommend' | 'Fashion' | 'Phones Tablets' | 'Electronics';
 
 const categories: Array<{ kind: CategoryKind; label: string }> = [
   { kind: 'food', label: 'Food' },
   { kind: 'hotels', label: 'Hotels' },
   { kind: 'services', label: 'Services' },
+  { kind: 'jobs', label: 'Jobs' },
+];
+
+const discoveryFilters: DiscoveryFilter[] = [
+  'Recommend',
+  'Fashion',
+  'Phones Tablets',
+  'Electronics',
 ];
 
 function SearchIcon() {
@@ -61,6 +72,16 @@ function CategoryIcon({ kind }: { kind: CategoryKind }) {
           <View style={styles.hotelWindow} />
         </View>
         <View style={styles.hotelSide} />
+      </View>
+    );
+  }
+
+  if (kind === 'jobs') {
+    return (
+      <View style={styles.categoryIconBox}>
+        <View style={styles.jobCase} />
+        <View style={styles.jobHandle} />
+        <View style={styles.jobLine} />
       </View>
     );
   }
@@ -115,13 +136,25 @@ function SectionHeader({
 
 export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenProfile, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenNotifications?: () => void; onOpenProfile?: () => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
+  const [discoveryFilter, setDiscoveryFilter] = useState<DiscoveryFilter>('Recommend');
   useEffect(() => { getLocalListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
   const promoWidth = Math.max(screenWidth - 28, 0);
   const promoHeight = promoWidth * (384 / 790);
   const productWidth = Math.min(156, (screenWidth - 42) / 2);
-  const productHeight = productWidth * (550 / 376);
+  const discoveryCardWidth = Math.max(0, (screenWidth - 42) / 2);
+  const discoveryListings = localListings.filter((listing) => {
+    if (discoveryFilter === 'Recommend') return true;
+    const searchable = [listing.category, listing.subCategory, listing.type, listing.title]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    if (discoveryFilter === 'Phones Tablets') {
+      return searchable.includes('phone') || searchable.includes('tablet') || searchable.includes('mobile');
+    }
+    return searchable.includes(discoveryFilter.toLowerCase());
+  });
 
   return (
     <ScrollView
@@ -182,28 +215,47 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        {localListings.map((listing) => (
-          <Pressable key={listing.id} accessibilityRole="button" onPress={() => onOpenListing?.(listing)} style={[styles.localProductCard, { width: productWidth }]}>
-            <Image
-              accessibilityLabel={`${listing.title} listing`}
-              resizeMode="contain"
-              source={{ uri: listing.imageUrls[0] }}
-              style={[styles.productCard, { width: productWidth, height: productHeight - 42 }]}
-            />
-            <Text numberOfLines={1} style={styles.localProductTitle}>{listing.title}</Text>
-            <Text style={styles.localProductPrice}>GHS {listing.price}</Text>
-          </Pressable>
-        ))}
+        {localListings.map((listing) => <MarketplaceProductCard key={listing.id} choiceBadge imageHeight={126} listing={listing} onPress={() => onOpenListing?.(listing)} rating={5} width={productWidth} />)}
         {!localListings.length ? <Text style={styles.emptyProducts}>No products posted yet.</Text> : null}
       </ScrollView>
 
-      <SectionHeader suffix="⌖">Best Selling Near</SectionHeader>
+      <SectionHeader onViewAll={onOpenHotSelling} suffix="⌖">Best Selling Near You</SectionHeader>
       {localListings.length ? <ScrollView horizontal contentContainerStyle={styles.nearbyRow} showsHorizontalScrollIndicator={false}>
-        {localListings.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing?.(listing)} style={styles.nearbyCard}>
-          <Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.nearbyImage} />
-          <View style={styles.nearbyCopy}><Text numberOfLines={1} style={styles.nearbyName}>{listing.title}</Text><Text style={styles.nearbyPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.nearbyLocation}>⌖ {listing.location}</Text></View>
-        </Pressable>)}
+        {localListings.map((listing) => <MarketplaceProductCard key={listing.id} imageHeight={126} listing={listing} onPress={() => onOpenListing?.(listing)} rating={4.5} width={productWidth} />)}
       </ScrollView> : <View style={styles.nearbyPlaceholder}><Text style={styles.nearbyPlaceholderText}>No nearby listings yet.</Text></View>}
+
+      <ScrollView
+        contentContainerStyle={styles.discoveryTabs}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        {discoveryFilters.map((filter) => {
+          const active = discoveryFilter === filter;
+          return (
+            <Pressable
+              accessibilityRole="button"
+              key={filter}
+              onPress={() => setDiscoveryFilter(filter)}
+              style={[styles.discoveryTab, active && styles.discoveryTabActive]}
+            >
+              <Text style={[styles.discoveryTabText, active && styles.discoveryTabTextActive]}>
+                {filter}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {discoveryListings.length ? (
+        <View style={styles.discoveryGrid}>
+          {discoveryListings.map((listing) => <MarketplaceProductCard key={listing.id} imageHeight={150} listing={listing} onPress={() => onOpenListing?.(listing)} rating={4.5} width={discoveryCardWidth} />)}
+        </View>
+      ) : (
+        <View style={styles.discoveryEmpty}>
+          <Text style={styles.discoveryEmptyTitle}>No {discoveryFilter.toLowerCase()} listings yet</Text>
+          <Text style={styles.discoveryEmptyCopy}>Products posted in this category will appear here.</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -419,6 +471,36 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderRightColor: 'transparent',
   },
+  jobCase: {
+    position: 'absolute',
+    left: 2,
+    top: 8,
+    width: 22,
+    height: 15,
+    borderWidth: 2,
+    borderColor: '#5C6BC0',
+    borderRadius: 3,
+  },
+  jobHandle: {
+    position: 'absolute',
+    left: 8,
+    top: 3,
+    width: 10,
+    height: 7,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderColor: '#5C6BC0',
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+  },
+  jobLine: {
+    position: 'absolute',
+    left: 3,
+    top: 14,
+    width: 20,
+    height: 2,
+    backgroundColor: '#5C6BC0',
+  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -481,6 +563,21 @@ const styles = StyleSheet.create({
   nearbyName: { color: '#222', fontSize: 12, fontWeight: '700' },
   nearbyPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', marginTop: 4 },
   nearbyLocation: { color: '#777', fontSize: 10, marginTop: 4 },
+  discoveryTabs: { gap: 8, paddingHorizontal: 16, paddingTop: 22, paddingBottom: 13 },
+  discoveryTab: { minHeight: 34, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: '#E7E7E7', borderRadius: 18, backgroundColor: '#FFF' },
+  discoveryTabActive: { borderColor: '#F45100', backgroundColor: '#FFF3ED' },
+  discoveryTabText: { color: '#686868', fontSize: 12, fontWeight: '600' },
+  discoveryTabTextActive: { color: '#F45100', fontWeight: '800' },
+  discoveryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 16 },
+  discoveryCard: { overflow: 'hidden', borderWidth: 1, borderColor: '#ECECEC', borderRadius: 13, backgroundColor: '#FFF' },
+  discoveryImage: { width: '100%', aspectRatio: 1.2, backgroundColor: '#F7F7F7' },
+  discoveryCopy: { padding: 9 },
+  discoveryName: { minHeight: 32, color: '#242424', fontSize: 12, lineHeight: 16, fontWeight: '700' },
+  discoveryPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', marginTop: 4 },
+  discoveryLocation: { color: '#777', fontSize: 10, marginTop: 5 },
+  discoveryEmpty: { alignItems: 'center', marginHorizontal: 16, paddingHorizontal: 20, paddingVertical: 28, borderRadius: 14, backgroundColor: '#FAFAFA' },
+  discoveryEmptyTitle: { color: '#333', fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  discoveryEmptyCopy: { color: '#777', fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 5 },
   pressed: {
     opacity: 0.8,
   },

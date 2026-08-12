@@ -66,7 +66,7 @@ function TabIcon({ active, tab }: { active: boolean; tab: AppTab }) {
   }
 
   if (tab === 'home') {
-    return <Text style={[styles.homeIcon, { color }]}>⌂</Text>;
+    return <Text style={[styles.homeIcon, { color: '#FFFFFF' }]}>⌂</Text>;
   }
 
   if (tab === 'inbox') {
@@ -109,6 +109,8 @@ function BottomTabBar({
               style={[
                 styles.tabIconContainer,
                 active && styles.tabIconSelected,
+                tab.key === 'home' && styles.homeTabIconContainer,
+                tab.key === 'home' && active && styles.homeTabIconSelected,
               ]}
             >
               <TabIcon active={active} tab={tab.key} />
@@ -300,6 +302,23 @@ const styles = StyleSheet.create({
   },
   tabIconSelected: {
     backgroundColor: '#FFF0E8',
+  },
+  homeTabIconContainer: {
+    width: 48,
+    height: 48,
+    marginTop: -20,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    borderRadius: 24,
+    backgroundColor: '#F45100',
+    shadowColor: '#F45100',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 7,
+    elevation: 8,
+  },
+  homeTabIconSelected: {
+    backgroundColor: '#F45100',
   },
   tabLabel: {
     color: '#6E6E6E',
