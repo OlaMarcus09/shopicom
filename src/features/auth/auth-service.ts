@@ -1,8 +1,10 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithCredential,
   signOut,
   updateProfile,
   type User,
@@ -28,6 +30,13 @@ export async function registerWithEmail(
 
 export function signInWithEmail(email: string, password: string) {
   return signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+}
+
+export function signInWithGoogleIdToken(idToken: string) {
+  return signInWithCredential(
+    firebaseAuth,
+    GoogleAuthProvider.credential(idToken),
+  );
 }
 
 export function signOutCurrentUser() {

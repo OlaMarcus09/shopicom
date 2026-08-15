@@ -1,5 +1,7 @@
 import { FirebaseError } from 'firebase/app';
 import type { User } from 'firebase/auth';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -19,14 +21,20 @@ import {
   registerWithEmail,
   requestPasswordReset,
   signInWithEmail,
+  signInWithGoogleIdToken,
   signOutCurrentUser,
   subscribeToAuthSession,
 } from './auth-service';
 import { AuthenticatedApp } from '../app/AuthenticatedApp';
+import { googleAuthRequestClientIds, isGoogleAuthConfigured } from '../../config/google-auth';
+
+WebBrowser.maybeCompleteAuthSession();
 
 type AuthMode = 'login' | 'register';
 type LoginMethod = 'phone' | 'email';
 type RegistrationMethod = 'phone' | 'email';
+
+const phoneOtpEnabled = false;
 
 const registrationAssets = {
   background: require('../../../assets/auth/ellipse.svg.png'),
@@ -65,9 +73,9 @@ export function AuthPrototypeScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [mode, setMode] = useState<AuthMode>('login');
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('phone');
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
   const [registrationMethod, setRegistrationMethod] =
-    useState<RegistrationMethod>('phone');
+    useState<RegistrationMethod>('email');
   const [displayName, setDisplayName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
@@ -76,6 +84,10 @@ export function AuthPrototypeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [, googleResponse, promptGoogleSignIn] = Google.useIdTokenAuthRequest({
+    ...googleAuthRequestClientIds,
+    selectAccount: true,
+  });
 
   useEffect(() => {
     return subscribeToAuthSession((nextUser) => {
@@ -84,12 +96,31 @@ export function AuthPrototypeScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!googleResponse) return;
+    if (googleResponse.type !== 'success') {
+      setIsSubmitting(false);
+      return;
+    }
+
+    const idToken = googleResponse.params.id_token || googleResponse.authentication?.idToken;
+    if (!idToken) {
+      setErrorMessage('Google did not return a valid sign-in token. Please try again.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    signInWithGoogleIdToken(idToken)
+      .catch((error) => setErrorMessage(getAuthErrorMessage(error)))
+      .finally(() => setIsSubmitting(false));
+  }, [googleResponse]);
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
     if (nextMode === 'register') {
-      setRegistrationMethod('phone');
+      setRegistrationMethod('email');
     } else {
-      setLoginMethod('phone');
+      setLoginMethod('email');
     }
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -109,11 +140,20 @@ export function AuthPrototypeScreen() {
     setSuccessMessage(null);
   }
 
-  function showGooglePendingMessage() {
+  async function handleGoogleSignIn() {
     setSuccessMessage(null);
-    setErrorMessage(
-      'Google sign-in will be available after the company OAuth setup is complete.',
-    );
+    setErrorMessage(null);
+    if (!isGoogleAuthConfigured) {
+      setErrorMessage('Google sign-in needs the Firebase Android OAuth client ID before it can be used.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await promptGoogleSignIn();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to open Google sign-in.');
+      setIsSubmitting(false);
+    }
   }
 
   async function submitRegistration() {
@@ -466,7 +506,8 @@ export function AuthPrototypeScreen() {
 
                 <Pressable
                   accessibilityRole="button"
-                  onPress={showGooglePendingMessage}
+                  disabled={isSubmitting}
+                  onPress={handleGoogleSignIn}
                   style={({ pressed }) => [
                     styles.registrationAlternativeButton,
                     pressed && styles.buttonPressed,
@@ -482,7 +523,7 @@ export function AuthPrototypeScreen() {
                   </Text>
                 </Pressable>
 
-                <Pressable
+                {phoneOtpEnabled ? <Pressable
                   accessibilityRole="button"
                   onPress={() =>
                     changeRegistrationMethod(
@@ -505,7 +546,7 @@ export function AuthPrototypeScreen() {
                       ? 'REGISTER WITH EMAIL'
                       : 'REGISTER WITH PHONE'}
                   </Text>
-                </Pressable>
+                </Pressable> : null}
               </View>
             </View>
           </ScrollView>
@@ -669,7 +710,7 @@ export function AuthPrototypeScreen() {
               <Pressable
                 accessibilityRole="button"
                 disabled={isSubmitting}
-                onPress={showGooglePendingMessage}
+                onPress={handleGoogleSignIn}
                 style={({ pressed }) => [
                   styles.registrationAlternativeButton,
                   styles.loginGoogleButton,
@@ -685,7 +726,7 @@ export function AuthPrototypeScreen() {
                 <Text style={styles.registrationAlternativeLabel}>GOOGLE</Text>
               </Pressable>
 
-              <Pressable
+              {phoneOtpEnabled ? <Pressable
                 accessibilityRole="button"
                 disabled={isSubmitting}
                 onPress={() =>
@@ -708,7 +749,7 @@ export function AuthPrototypeScreen() {
                     ? 'LOGIN WITH EMAIL'
                     : 'LOGIN WITH PHONE'}
                 </Text>
-              </Pressable>
+              </Pressable> : null}
             </View>
           </View>
         </ScrollView>

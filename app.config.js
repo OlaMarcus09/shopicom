@@ -2,6 +2,7 @@ const { expo } = require('./app.json');
 
 module.exports = {
   ...expo,
+  plugins: [...(expo.plugins ?? []), 'expo-web-browser'],
   android: {
     ...expo.android,
     googleServicesFile:
