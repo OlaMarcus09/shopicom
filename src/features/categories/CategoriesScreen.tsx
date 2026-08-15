@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
+import { marketplaceFeatures, type MarketplaceFeature } from '../../config/marketplace-features';
 
 const groups = [
   { label: 'Trending', icon: '✦', color: '#FFF0E8' },
@@ -21,14 +22,28 @@ const groups = [
   { label: 'Television', icon: '▤', color: '#F0F2FF' },
 ];
 
-const categories = [
-  'Fashion', 'Phones & Tablets', 'Electronics', 'Laptops & Computers',
-  'Home, Furniture & Appliances', 'Beauty & Personal Care', 'Health & Fitness',
-  'Babies & Kids', 'Food, Agric & Farming', 'Sports & Entertainment',
+const allCategoryShortcuts: Array<{ label: string; feature: MarketplaceFeature }> = [
+  { label: 'Products', feature: 'products' },
+  { label: 'Services', feature: 'services' },
+  { label: 'Fashion', feature: 'products' },
+  { label: 'Phones & Tablets', feature: 'products' },
+  { label: 'Electronics', feature: 'products' },
+  { label: 'Laptops & Computers', feature: 'products' },
+  { label: 'Home, Furniture & Appliances', feature: 'products' },
+  { label: 'Beauty & Personal Care', feature: 'services' },
+  { label: 'Health & Fitness', feature: 'services' },
+  { label: 'Babies & Kids', feature: 'products' },
+  { label: 'Food, Agric & Farming', feature: 'products' },
+  { label: 'Sports & Entertainment', feature: 'products' },
+  { label: 'Hotels', feature: 'hotels' },
+  { label: 'Jobs', feature: 'jobs' },
+  { label: 'Food', feature: 'food' },
+  { label: 'Property', feature: 'property' },
 ];
+const categories = allCategoryShortcuts.filter((item) => marketplaceFeatures[item.feature]);
 
 export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpenSearch }: { initialCategory?: string; onBack: () => void; onOpenListing: (listing: LocalListing) => void; onOpenSearch: () => void }) {
-  const [selected, setSelected] = useState(initialCategory || 'Recommend');
+  const [selected, setSelected] = useState(() => categories.some((item) => item.label === initialCategory) ? (initialCategory || 'Recommend') : 'Recommend');
   const [listings, setListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const sidebarWidth = Math.min(116, width * 0.3);
@@ -53,8 +68,8 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
           >
             <Pressable onPress={() => setSelected('Recommend')}><Text style={styles.recommend}>Recommend</Text></Pressable>
             {categories.map((item) => (
-              <Pressable key={item} onPress={() => setSelected(item)} style={[styles.sideItem, selected === item && styles.sideItemActive]}>
-                <Text style={[styles.sideText, selected === item && styles.sideTextActive]}>{item}</Text>
+              <Pressable key={item.label} onPress={() => setSelected(item.label)} style={[styles.sideItem, selected === item.label && styles.sideItemActive]}>
+                <Text style={[styles.sideText, selected === item.label && styles.sideTextActive]}>{item.label}</Text>
               </Pressable>
             ))}
           </ScrollView>

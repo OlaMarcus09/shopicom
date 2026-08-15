@@ -12,21 +12,25 @@ import { useEffect, useState } from 'react';
 import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
 import { MarketplaceProductCard } from '../listings/MarketplaceProductCard';
+import { marketplaceFeatures, type MarketplaceFeature } from '../../config/marketplace-features';
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
 };
 
-type CategoryKind = 'food' | 'hotels' | 'services' | 'jobs';
+type CategoryKind = 'products' | 'food' | 'hotels' | 'services' | 'jobs' | 'property';
 
 type DiscoveryFilter = 'Recommend' | 'Fashion' | 'Phones Tablets' | 'Electronics';
 
-const categories: Array<{ kind: CategoryKind; label: string }> = [
-  { kind: 'food', label: 'Food' },
-  { kind: 'hotels', label: 'Hotels' },
-  { kind: 'services', label: 'Services' },
-  { kind: 'jobs', label: 'Jobs' },
+const allCategories: Array<{ feature: MarketplaceFeature; kind: CategoryKind; label: string }> = [
+  { feature: 'products', kind: 'products', label: 'Products' },
+  { feature: 'services', kind: 'services', label: 'Services' },
+  { feature: 'hotels', kind: 'hotels', label: 'Hotels' },
+  { feature: 'jobs', kind: 'jobs', label: 'Jobs' },
+  { feature: 'food', kind: 'food', label: 'Food' },
+  { feature: 'property', kind: 'property', label: 'Property' },
 ];
+const categories = allCategories.filter((item) => marketplaceFeatures[item.feature]);
 
 const discoveryFilters: DiscoveryFilter[] = [
   'Recommend',
@@ -55,6 +59,7 @@ function BellIcon() {
 }
 
 function CategoryIcon({ kind }: { kind: CategoryKind }) {
+  if (kind === 'products') return <View style={styles.categoryIconBox}><View style={styles.productBox} /><View style={styles.productBoxLine} /></View>;
   if (kind === 'food') {
     return (
       <View style={styles.categoryIconBox}>
@@ -415,6 +420,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  productBox: { position: 'absolute', left: 3, top: 3, width: 19, height: 18, borderWidth: 2, borderColor: '#5C6BC0', borderRadius: 3 },
+  productBoxLine: { position: 'absolute', left: 7, top: 12, width: 12, height: 2, backgroundColor: '#5C6BC0' },
   foodLine: {
     position: 'absolute',
     top: 3,
