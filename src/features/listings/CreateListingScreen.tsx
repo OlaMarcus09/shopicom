@@ -98,6 +98,10 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
     }
   }
 
+  function removeImage(uri: string) {
+    setImageUris((current) => current.filter((item) => item !== uri));
+  }
+
   async function submitListing() {
     setStatusMessage(null);
 
@@ -174,7 +178,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
 
           {imageUris.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.previewRow}>
-              {imageUris.map((uri) => <Image key={uri} source={{ uri }} style={styles.preview} />)}
+              {imageUris.map((uri) => <View key={uri} style={styles.previewWrap}><Image source={{ uri }} style={styles.preview} /><Pressable accessibilityLabel="Remove selected image" accessibilityRole="button" hitSlop={5} onPress={() => removeImage(uri)} style={styles.removePreview}><Text style={styles.removePreviewText}>×</Text></Pressable></View>)}
             </ScrollView>
           ) : null}
 
@@ -244,6 +248,9 @@ const styles = StyleSheet.create({
   uploadHint: { color: '#656565', fontSize: 10, lineHeight: 13, textAlign: 'center' },
   previewRow: { marginTop: -15, marginBottom: 20 },
   preview: { width: 62, height: 62, borderRadius: 9, marginRight: 8 },
+  previewWrap: { position: 'relative', width: 70, height: 70, marginRight: 2 },
+  removePreview: { position: 'absolute', top: -4, right: 2, width: 22, height: 22, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: '#222', borderWidth: 2, borderColor: '#FFF' },
+  removePreviewText: { color: '#FFF', fontSize: 16, lineHeight: 18, fontWeight: '700' },
   input: { height: 48, borderWidth: 1, borderColor: '#EEE', borderRadius: 10, color: '#111', fontSize: 14, paddingHorizontal: 15, marginBottom: 22 },
   fieldGroup: { marginBottom: 20 },
   selectField: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#EEE', borderRadius: 10, paddingHorizontal: 15 },
