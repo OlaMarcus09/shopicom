@@ -13,14 +13,13 @@ import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
 import { MarketplaceProductCard } from '../listings/MarketplaceProductCard';
 import { marketplaceFeatures, type MarketplaceFeature } from '../../config/marketplace-features';
+import { enabledMarketplaceSections } from '../../config/category-taxonomy';
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
 };
 
 type CategoryKind = 'products' | 'food' | 'hotels' | 'services' | 'jobs' | 'property';
-
-type DiscoveryFilter = 'Recommend' | 'Fashion' | 'Phones Tablets' | 'Electronics';
 
 const allCategories: Array<{ feature: MarketplaceFeature; kind: CategoryKind; label: string }> = [
   { feature: 'products', kind: 'products', label: 'Products' },
@@ -32,11 +31,9 @@ const allCategories: Array<{ feature: MarketplaceFeature; kind: CategoryKind; la
 ];
 const categories = allCategories.filter((item) => marketplaceFeatures[item.feature]);
 
-const discoveryFilters: DiscoveryFilter[] = [
+const discoveryFilters = [
   'Recommend',
-  'Fashion',
-  'Phones Tablets',
-  'Electronics',
+  ...(enabledMarketplaceSections.find((section) => section.id === 'products')?.categories.slice(0, 3).map((category) => category.name) || []),
 ];
 
 function SearchIcon() {
@@ -142,7 +139,7 @@ function SectionHeader({
 
 export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenProfile, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenNotifications?: () => void; onOpenProfile?: () => void; onOpenSearch?: () => void }) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
-  const [discoveryFilter, setDiscoveryFilter] = useState<DiscoveryFilter>('Recommend');
+  const [discoveryFilter, setDiscoveryFilter] = useState('Recommend');
   useEffect(() => { getCombinedListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
@@ -156,9 +153,6 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
       .filter(Boolean)
       .join(' ')
       .toLowerCase();
-    if (discoveryFilter === 'Phones Tablets') {
-      return searchable.includes('phone') || searchable.includes('tablet') || searchable.includes('mobile');
-    }
     return searchable.includes(discoveryFilter.toLowerCase());
   });
 

@@ -11,36 +11,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
-import { marketplaceFeatures, type MarketplaceFeature } from '../../config/marketplace-features';
+import type { MarketplaceFeature } from '../../config/marketplace-features';
+import { enabledMarketplaceSections, getCategory, getMarketplaceSection, listingBelongsToSection } from '../../config/category-taxonomy';
 
-const groups = [
-  { label: 'Trending', icon: '✦', color: '#FFF0E8' },
-  { label: 'Fashion', icon: '◈', color: '#F1ECFF' },
-  { label: 'Mobile Phones', icon: '▣', color: '#E9F5FF' },
-  { label: 'Smart Watches', icon: '◷', color: '#E9FFF5' },
-  { label: 'Motorcycles', icon: '⌁', color: '#FFF7E5' },
-  { label: 'Television', icon: '▤', color: '#F0F2FF' },
-];
-
-const allCategoryShortcuts: Array<{ label: string; feature: MarketplaceFeature }> = [
-  { label: 'Products', feature: 'products' },
-  { label: 'Services', feature: 'services' },
-  { label: 'Fashion', feature: 'products' },
-  { label: 'Phones & Tablets', feature: 'products' },
-  { label: 'Electronics', feature: 'products' },
-  { label: 'Laptops & Computers', feature: 'products' },
-  { label: 'Home, Furniture & Appliances', feature: 'products' },
-  { label: 'Beauty & Personal Care', feature: 'services' },
-  { label: 'Health & Fitness', feature: 'services' },
-  { label: 'Babies & Kids', feature: 'products' },
-  { label: 'Food, Agric & Farming', feature: 'products' },
-  { label: 'Sports & Entertainment', feature: 'products' },
-  { label: 'Hotels', feature: 'hotels' },
-  { label: 'Jobs', feature: 'jobs' },
-  { label: 'Food', feature: 'food' },
-  { label: 'Property', feature: 'property' },
-];
-const categories = allCategoryShortcuts.filter((item) => marketplaceFeatures[item.feature]);
+const categories = enabledMarketplaceSections.flatMap((section) => [
+  { label: section.label, feature: section.id as MarketplaceFeature },
+  ...section.categories.map((category) => ({ label: category.name, feature: section.id as MarketplaceFeature })),
+]);
 
 export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpenSearch }: { initialCategory?: string; onBack: () => void; onOpenListing: (listing: LocalListing) => void; onOpenSearch: () => void }) {
   const [selected, setSelected] = useState(() => categories.some((item) => item.label === initialCategory) ? (initialCategory || 'Recommend') : 'Recommend');
@@ -48,10 +25,19 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
   const { width } = useWindowDimensions();
   const sidebarWidth = Math.min(116, width * 0.3);
   useEffect(() => { getCombinedListings().then(setListings).catch(() => setListings([])); }, []);
+  const selectedSection = getMarketplaceSection(selected);
+  const selectedCategory = getCategory(selected)?.category;
+  const visibleTaxonomyItems = selectedSection
+    ? selectedSection.categories.map((item) => item.name)
+    : selectedCategory
+      ? [...selectedCategory.subcategories]
+      : enabledMarketplaceSections.map((section) => section.label);
   const matches = useMemo(() => {
     if (selected === 'Recommend' || selected === 'Trending') return listings;
-    const term = selected.toLowerCase().replace('mobile ', '').replace(' & tablets', '').replace('laptops & ', '');
-    return listings.filter((listing) => [listing.category, listing.subCategory, listing.type, listing.title].some((value) => value?.toLowerCase().includes(term)));
+    const section = getMarketplaceSection(selected);
+    if (section) return listings.filter((listing) => listingBelongsToSection(listing.category, section.id));
+    const term = selected.toLowerCase();
+    return listings.filter((listing) => [listing.category, listing.subCategory].some((value) => value?.toLowerCase() === term));
   }, [listings, selected]);
 
   return (
@@ -85,14 +71,10 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
               <Text style={styles.viewAll}>View all</Text>
             </View>
             {matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.grid}>
-              {groups.map((group) => (
-                <Pressable key={group.label} onPress={() => setSelected(group.label)} style={styles.tile}>
-                  <View style={[styles.icon, { backgroundColor: group.color }]}>
-                    <Text style={styles.iconText}>{group.icon}</Text>
-                  </View>
-                  <Text numberOfLines={2} style={styles.tileLabel}>
-                    {group.label}
-                  </Text>
+              {visibleTaxonomyItems.map((item) => (
+                <Pressable key={item} onPress={() => setSelected(item)} style={styles.tile}>
+                  <View style={styles.icon}><Text style={styles.iconText}>◈</Text></View>
+                  <Text numberOfLines={2} style={styles.tileLabel}>{item}</Text>
                 </Pressable>
               ))}
             </View>}

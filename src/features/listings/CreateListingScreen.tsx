@@ -12,22 +12,9 @@ import {
 } from 'react-native';
 
 import { firebaseAuth } from '../../services/firebase';
+import { enabledMarketplaceSections, getMarketplaceSection } from '../../config/category-taxonomy';
 import { saveLocalListing } from './local-listing-service';
 import { createListing } from './listing-service';
-
-const categoryOptions = ['Electronics', 'Fashion', 'Home & Garden', 'Vehicles'];
-const subCategoryOptions: Record<string, string[]> = {
-  Electronics: ['Smart Watches', 'Phones', 'Computers', 'Accessories', 'Television'],
-  Fashion: ["Men's Fashion", "Women's Fashion", 'Shoes', 'Bags & Accessories'],
-  'Home & Garden': ['Furniture', 'Home Appliances', 'Kitchen & Dining', 'Garden'],
-  Vehicles: ['Cars', 'Motorcycles', 'Vehicle Parts', 'Buses & Trucks'],
-};
-const typeOptions: Record<string, string[]> = {
-  'Smart Watches': ['Fitness Watch', 'Luxury Watch', 'Kids Watch'], Phones: ['Smartphone', 'Feature Phone'], Computers: ['Laptop', 'Desktop'], Accessories: ['Chargers', 'Headphones', 'Cases'], Television: ['Smart TV', 'LED TV'],
-  "Men's Fashion": ['Clothing', 'Footwear'], "Women's Fashion": ['Clothing', 'Footwear'], Shoes: ['Sneakers', 'Formal Shoes', 'Sandals'], 'Bags & Accessories': ['Handbag', 'Backpack', 'Jewelry'],
-  Furniture: ['Sofa', 'Bed', 'Table'], 'Home Appliances': ['Refrigerator', 'Washing Machine', 'Air Conditioner'], 'Kitchen & Dining': ['Cookware', 'Kitchen Appliance'], Garden: ['Garden Tools', 'Outdoor Furniture'],
-  Cars: ['Sedan', 'SUV', 'Pickup'], Motorcycles: ['Motorbike', 'Scooter'], 'Vehicle Parts': ['Engine Parts', 'Tyres', 'Accessories'], 'Buses & Trucks': ['Bus', 'Truck'],
-};
 
 function SelectField({ label, value, options, onChange }: { label?: string; value: string; options: string[]; onChange: (value: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -68,14 +55,16 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [listingSection, setListingSection] = useState(enabledMarketplaceSections[0]?.label || 'Products');
   const [category, setCategory] = useState('Select Category');
   const [subCategory, setSubCategory] = useState('Select Sub-Category');
-  const [type, setType] = useState('Select Type');
   const [condition, setCondition] = useState('New');
   const [specType, setSpecType] = useState('');
   const [brand, setBrand] = useState('');
   const [deliveryOptions, setDeliveryOptions] = useState<Array<'in_store_pickup' | 'local_delivery'>>(['in_store_pickup']);
   const [negotiation, setNegotiation] = useState<'yes' | 'no' | 'not_sure'>('not_sure');
+  const selectedSection = getMarketplaceSection(listingSection);
+  const selectedCategory = selectedSection?.categories.find((item) => item.name === category);
 
   async function selectImages() {
     setStatusMessage(null);
@@ -122,7 +111,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         title: title.trim(),
         category,
         subCategory,
-        type: specType.trim() || (type === 'Select Type' ? undefined : type),
+        type: specType.trim() || undefined,
         brand: brand.trim() || undefined,
         condition,
         price: Number(price),
@@ -183,9 +172,9 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
           ) : null}
 
           <TextInput onChangeText={setTitle} placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} value={title} />
-          <SelectField label="Category*" value={category} options={categoryOptions} onChange={(value) => { setCategory(value); setSubCategory('Select Sub-Category'); setType('Select Type'); }} />
-          <SelectField label="Sub-Category*" value={subCategory} options={subCategoryOptions[category] || []} onChange={(value) => { setSubCategory(value); setType('Select Type'); }} />
-          <SelectField label="Type" value={type} options={typeOptions[subCategory] || []} onChange={setType} />
+          <SelectField label="Listing Type*" value={listingSection} options={enabledMarketplaceSections.map((section) => section.label)} onChange={(value) => { setListingSection(value); setCategory('Select Category'); setSubCategory('Select Sub-Category'); }} />
+          <SelectField label="Category*" value={category} options={selectedSection?.categories.map((item) => item.name) || []} onChange={(value) => { setCategory(value); setSubCategory('Select Sub-Category'); }} />
+          <SelectField label="Sub-Category*" value={subCategory} options={selectedCategory ? [...selectedCategory.subcategories] : []} onChange={setSubCategory} />
 
           <Text style={styles.sectionTitle}>Specifications</Text>
           <View style={styles.row}>
