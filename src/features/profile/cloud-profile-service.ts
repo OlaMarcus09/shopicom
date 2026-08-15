@@ -11,6 +11,12 @@ export async function getCloudProfile(userId: string) {
 
 export async function saveCloudProfile(userId: string, profile: LocalProfile) {
   await setDoc(doc(firebaseDb, 'profiles', userId), { ...profile, updatedAt: serverTimestamp() }, { merge: true });
+  await setDoc(doc(firebaseDb, 'sellerProfiles', userId), { displayName: profile.displayName, location: profile.location, bio: profile.bio, whatsappContact: profile.whatsappContact || null, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+export async function getCloudSellerProfile(userId: string) {
+  const snapshot = await getDoc(doc(firebaseDb, 'sellerProfiles', userId));
+  return snapshot.exists() ? snapshot.data() as LocalProfile : null;
 }
 
 export async function saveCloudVendorApplication(userId: string, application: LocalVendorApplication) {

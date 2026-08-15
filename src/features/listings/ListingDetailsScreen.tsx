@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { Alert, Image, Linking, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { LocalListing } from './local-listing-service';
 import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
+import { getCloudSellerProfile } from '../profile/cloud-profile-service';
+import { openWhatsApp } from '../profile/whatsapp';
 
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
   const imageSources = listing?.imageUrls.length ? listing.imageUrls.map((uri) => ({ uri })) : [imageSource];
   const [activeImage, setActiveImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [whatsappContact, setWhatsappContact] = useState<string | undefined>();
   const { width } = useWindowDimensions();
   useEffect(() => { if (listing) getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined); }, [listing]);
+  useEffect(() => { setWhatsappContact(undefined); if (listing?.sellerId) getCloudSellerProfile(listing.sellerId).then((profile) => setWhatsappContact(profile?.whatsappContact)).catch(() => undefined); }, [listing?.sellerId]);
   async function shareListing() {
     const title = listing?.title || 'Ultra smart watch';
     const price = listing?.price ?? 200;
@@ -51,7 +55,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
           <View style={styles.priceRow}><Text style={styles.price}>GHS {listing?.price ?? 200}</Text>{listing?.discount ? <Text style={styles.discount}>-{listing.discount}%</Text> : <><Text style={styles.oldPrice}>GHS 250</Text><Text style={styles.discount}>-25%</Text></>}</View>
           <Text style={styles.location}>⌖  {listing?.location || 'Banvum Tamale'}</Text>
           <Text style={styles.rating}>★★★★★  <Text style={styles.ratingCopy}>0.0   (0 reviews)</Text></Text>
-          <View style={styles.contactRow}><Pressable onPress={callSeller} style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable></View>
+          <View style={styles.contactRow}><Pressable onPress={callSeller} style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable>{whatsappContact ? <Pressable onPress={() => openWhatsApp(whatsappContact, listing?.title || 'this listing')} style={styles.whatsapp}><Text style={styles.contactText}>WhatsApp</Text></Pressable> : null}</View>
         </View>
 
         <View style={styles.section}>
@@ -93,6 +97,7 @@ const styles = StyleSheet.create({
   contactRow: { flexDirection: 'row', gap: 9, marginTop: 18 },
   call: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#13BE84' },
   message: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#3C7EF0' }, contactText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+  whatsapp: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#16A269' },
   specGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 18 }, spec: { width: '50%' }, specValue: { color: '#222', fontSize: 15, fontWeight: '800' }, specLabel: { color: '#777', fontSize: 12, fontWeight: '600', marginTop: 3 },
   heading: { color: '#222', fontSize: 15, fontWeight: '800', marginTop: 22, marginBottom: 8 }, description: { color: '#666', fontSize: 12, lineHeight: 17 },
   deliveryRow: { flexDirection: 'row', gap: 10 }, delivery: { flex: 1, minHeight: 58, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#16C587', borderRadius: 8, padding: 9 }, deliveryIcon: { color: '#16C587', fontSize: 20, marginRight: 7 }, deliveryTitle: { color: '#222', fontSize: 12, fontWeight: '800' }, deliveryCopy: { color: '#555', fontSize: 9, marginTop: 2 },

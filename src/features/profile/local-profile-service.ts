@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type LocalProfile = { displayName: string; location: string; bio: string };
+export type LocalProfile = { displayName: string; location: string; bio: string; whatsappContact?: string };
 
 function profileKey(userId: string) { return `@shopicom/profile/${userId}`; }
 
