@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -7,8 +8,14 @@ import { getLocalProfile, type LocalProfile } from './local-profile-service';
 type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; onOpenVendorOnboarding: () => void; user: User };
 
 const accountItems = ['My Listings', 'Become a Vendor', 'Favorites', 'Edit Profile', 'Privacy & Security'];
-const supportItems = ['Help & Support', 'Terms and Policies', 'App Settings'];
+const supportItems = ['Help & Support', 'Privacy Policy', 'Terms of Service', 'Cookie Policy', 'App Settings'];
 const aboutItems = ['About Shopicom', 'Rate us on playstore'];
+
+const policyUrls: Record<string, string> = {
+  'Privacy Policy': 'https://shopicomltd.online/privacy-policy',
+  'Terms of Service': 'https://shopicomltd.online/terms-of-service',
+  'Cookie Policy': 'https://shopicomltd.online/cookie-policy',
+};
 
 function MenuCard({ items, onPressItem }: { items: string[]; onPressItem?: (item: string) => void }) {
   return <View style={styles.menuCard}>{items.map((item) => <Pressable key={item} onPress={() => onPressItem?.(item)} style={styles.menuItem}><Text style={styles.menuIcon}>○</Text><Text style={styles.menuLabel}>{item}</Text><Text style={styles.arrow}>›</Text></Pressable>)}</View>;
@@ -19,12 +26,16 @@ export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onO
   useEffect(() => { getLocalProfile(user.uid).then(setProfile).catch(() => setProfile(null)); }, [user.uid]);
   const displayName = profile?.displayName || user.displayName || 'Shopicom User';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'A';
+  async function openSupportItem(item: string) {
+    const url = policyUrls[item];
+    if (url) await WebBrowser.openBrowserAsync(url);
+  }
   return <View style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}><Text style={styles.headerTitle}>Profile</Text><Text style={styles.share}>⌯</Text></View>
       <View style={styles.profile}><View style={styles.avatar}><Text style={styles.avatarText}>{initial}</Text></View><Text style={styles.name}>{displayName}</Text><Text style={styles.id}>{user.email || 'Account'}</Text><Text style={styles.location}>⌖  {profile?.location || 'Area, City'}</Text><View style={styles.stats}><Text><Text style={styles.statOrange}>0 </Text>Followers</Text><Text><Text style={styles.statOrange}>0.0 </Text>Ratings(0)</Text><Text><Text style={styles.statOrange}>0 </Text>Following</Text></View><Text style={styles.bio}>{profile?.bio || 'No bio yet. Tell others about yourself'}</Text></View>
       <Text style={styles.groupTitle}>ACCOUNT</Text><MenuCard items={accountItems} onPressItem={(item) => { if (item === 'My Listings') onOpenMyListings(); if (item === 'Favorites') onOpenFavorites(); if (item === 'Edit Profile') onOpenEditProfile(); if (item === 'Become a Vendor') onOpenVendorOnboarding(); }} />
-      <Text style={styles.groupTitle}>SUPPORT & APP</Text><MenuCard items={supportItems} />
+      <Text style={styles.groupTitle}>SUPPORT & APP</Text><MenuCard items={supportItems} onPressItem={openSupportItem} />
       <Text style={styles.groupTitle}>ABOUT</Text><MenuCard items={aboutItems} />
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
       <Pressable disabled={isSubmitting} onPress={onLogout} style={[styles.logout, isSubmitting && styles.disabled]}>{isSubmitting ? <ActivityIndicator color="#F22" /> : <><Text style={styles.logoutIcon}>⇥</Text><Text style={styles.logoutText}>Log Out</Text></>}</Pressable>
