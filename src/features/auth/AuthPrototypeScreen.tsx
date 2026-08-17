@@ -99,6 +99,13 @@ export function AuthPrototypeScreen() {
   useEffect(() => {
     if (!googleResponse) return;
     if (googleResponse.type !== 'success') {
+      if (googleResponse.type === 'error') {
+        setErrorMessage(
+          googleResponse.params.error_description ||
+            googleResponse.error?.message ||
+            'Google sign-in could not be completed. Please try again.',
+        );
+      }
       setIsSubmitting(false);
       return;
     }

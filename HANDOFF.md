@@ -1,7 +1,7 @@
 # Shopicom Mobile — Session Handoff
 
-**Updated:** 2026-08-06  
-**Current milestone:** Core Figma frontend screens approved on Android; Firestore listing foundation deployed; Storage awaits founder billing approval.  
+**Updated:** 2026-08-17
+**Current milestone:** MVP screens and core marketplace flows are implemented; Firebase is now on Blaze and cloud image storage is the next integration milestone.
 **Working preference:** Complete and report one bounded step before moving to the next.
 
 ## Project configuration
@@ -12,6 +12,8 @@
 - Android package: `com.shopicom.app`
 - Development APK is installed on the physical Android phone.
 - Email/password Firebase authentication is enabled and physically verified.
+- Google Sign-In is required for MVP. Its OAuth flow is implemented, but the first APK test exposed an Android redirect-scheme error. The native redirect fix is now in the code and requires a fresh APK build and phone test.
+- Firebase billing has been upgraded to Blaze. Storage bucket creation and deployment are now unblocked.
 
 ## Completed and verified
 
@@ -43,9 +45,19 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 - Firestore listing model and services added in `src/features/listings/`.
 - Firestore security rules and active-listing index deployed successfully to `shopicom-limited-dev`.
 - Expo Image Picker installed.
-- Create Listing now supports selecting up to 10 photos, previewing them, uploading them to Storage, and saving the listing to Firestore.
-- Storage rules are written locally in `storage.rules`, but Storage cannot be deployed until Firebase Storage is created.
-- Firebase Console currently requires the project to upgrade to the Blaze pay-as-you-go plan before Storage can be enabled. Do not upgrade without founder approval.
+- Create Listing supports selecting up to 10 photos, removing individual selections, previewing them, saving the listing locally, and syncing listing metadata to Firestore.
+- Listing images are still local to the device; Storage upload code has not yet been connected.
+- Storage rules are written locally in `storage.rules` and are ready to deploy after the Firebase Storage bucket is created.
+- Firebase is now on the Blaze plan, so the previous billing blocker is resolved.
+
+## Confirmed MVP scope updates
+
+- Products and Services are enabled for the first release. Hotels, Jobs, Food, and Property remain gated for a later phase.
+- The shared category and subcategory taxonomy drives Create Listing, Categories, and Search filters.
+- The vendor application contains the confirmed personal and business fields and submits with `pending` status.
+- Optional seller WhatsApp contact is supported on storefront and listing details.
+- Privacy Policy, Terms of Service, and Cookie Policy open the current official Shopicom pages in an in-app browser.
+- Phone OTP remains deferred; its existing scaffolding is preserved.
 
 ## Categories implementation
 
@@ -62,19 +74,18 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 
 ## Exact next step
 
-1. Start Metro with:
-   `EXPO_NO_TELEMETRY=1 npm run start -- --dev-client --lan --port 8097`
-2. If the founder approves Blaze, enable Storage at the Firebase Console, choose `europe-west1 (Belgium)`, then deploy `storage.rules`.
-3. Rebuild the Android development APK because `expo-image-picker` adds a native module.
-4. Test posting a listing with one image, then verify it appears in Firestore/Storage.
-5. If billing is not approved, keep using local sample images and continue non-upload marketplace work.
+1. Create the Firebase Storage bucket in the same region as the Firestore database.
+2. Deploy `storage.rules` and verify authenticated listing-image access.
+3. Connect Create Listing image uploads to Firebase Storage and save download URLs in Firestore.
+4. Build a fresh preview APK containing the Google redirect fix and Storage integration.
+5. Test Google Sign-In and create a listing on one phone, then verify the listing and images on another device.
 
 ## Pending product work
 
-- Replace sample listing cards with Firestore data.
-- Connect Create Listing form to Firestore and Storage.
+- Replace remaining hardcoded listing/review presentation data with real records.
+- Connect Create Listing images to Firebase Storage.
 - Add real search, categories, vendor data, reviews, and messaging.
-- Phone and Google authentication backend setup remains intentionally deferred.
+- Phone authentication remains intentionally deferred. Google authentication is implemented and awaiting a fresh APK verification after the redirect fix.
 
 ## Recent commits
 

@@ -1,7 +1,7 @@
 # Shopicom mobile app: MVP status, delivery roadmap and current blockers
 
 **Prepared by:** Olawale Marcus  
-**Date:** 13 August 2026  
+**Updated:** 17 August 2026
 **Current build:** Android MVP development and internal preview  
 **Repository:** https://github.com/OlaMarcus09/shopicom.git
 
@@ -47,7 +47,7 @@ The app is not ready for public release yet. The main work remaining is completi
 - [x] Password-reset service foundation.
 - [x] Login and registration validation and error states.
 - [ ] Phone-number authentication and OTP verification.
-- [ ] Google sign-in.
+- [~] Google sign-in is implemented. The first standalone APK test failed at the Android OAuth redirect; the redirect-scheme fix requires a new APK and physical-phone verification.
 - [ ] Email verification flow.
 - [ ] Final password recovery screen and complete user-facing flow.
 
@@ -225,11 +225,11 @@ Important: deleting or reinstalling the app can remove locally stored images and
 
 The admin dashboard is part of the complete operating product, but it is separate from the mobile Figma screens and has not been built yet.
 
-## Main bottleneck: Firebase Storage billing
+## Firebase Storage status
 
-Firebase currently requires the `shopicom-limited-dev` project to move to the Blaze pay-as-you-go plan before Storage can be enabled.
+The `shopicom-limited-dev` project has now been upgraded to Firebase Blaze. The former billing blocker is resolved.
 
-I have not enabled billing because the Firebase project and billing responsibility belong to the company. The founder needs to approve the upgrade or approve another image-storage provider.
+The next work is to create the Storage bucket, deploy the existing Storage rules, connect listing-image uploads, and test images across two devices.
 
 ### What this blocks
 
@@ -240,21 +240,15 @@ I have not enabled billing because the Firebase project and billing responsibili
 - Images surviving app deletion or reinstallation.
 - A reliable standalone demo where the founder and developer see the same product photos.
 
-### Available decisions
-
-1. Approve Firebase Blaze and keep Authentication, Firestore and Storage in one Firebase project.
-2. Keep Firebase for Authentication and Firestore, but use another provider for images.
-3. Continue with local images temporarily, accepting that they are device-specific and can be lost.
-
-My preferred option is Firebase Blaze with spending alerts and strict Storage rules. It keeps the architecture simpler. A different image provider is possible, but it adds another service, another access policy and more integration work.
+Until that integration is complete, listing images remain device-specific and can still be lost when the app is removed.
 
 ## Other dependencies and decisions needed
 
-- [!] Confirm Firebase Storage billing or choose an alternative image provider.
-- [ ] Confirm whether phone OTP and Google sign-in are required for the first public MVP.
-- [ ] Confirm the exact vendor approval process and required business documents.
-- [ ] Confirm which categories are in the first launch. The design includes Hotels, Jobs and Services, while the earlier MVP scope treated some verticals as deferred.
-- [ ] Confirm whether WhatsApp contact must be included in the first release.
+- [x] Firebase Blaze approved for the development project.
+- [x] Google sign-in is required for MVP; phone OTP is deferred.
+- [~] Vendor form fields are confirmed and no KYC documents are required for this release; the later admin approval workflow still needs definition.
+- [x] Products and Services are the first-release categories. Hotels, Jobs, Food, and Property are deferred behind feature gates.
+- [x] Optional WhatsApp seller contact is included in the first release.
 - [ ] Confirm who will moderate reports and approve vendors.
 - [ ] Confirm whether the first release needs a separate web admin dashboard.
 - [ ] Provide final Terms, Privacy Policy, Help and About content.

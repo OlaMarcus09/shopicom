@@ -6,6 +6,22 @@ export const googleAuthClientIds = {
   web: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
 };
 
+const googleAndroidClientIdSuffix = '.apps.googleusercontent.com';
+
+export const googleAndroidRedirectScheme = googleAuthClientIds.android?.endsWith(
+  googleAndroidClientIdSuffix,
+)
+  ? `com.googleusercontent.apps.${googleAuthClientIds.android.slice(
+      0,
+      -googleAndroidClientIdSuffix.length,
+    )}`
+  : undefined;
+
+export const googleAuthRedirectUri =
+  Platform.OS === 'android' && googleAndroidRedirectScheme
+    ? `${googleAndroidRedirectScheme}:/oauthredirect`
+    : undefined;
+
 export const isGoogleAuthConfigured = Boolean(
   Platform.select({
     android: googleAuthClientIds.android,
@@ -20,4 +36,5 @@ export const googleAuthRequestClientIds = {
   androidClientId: googleAuthClientIds.android || 'google-android-client-not-configured',
   iosClientId: googleAuthClientIds.ios || 'google-ios-client-not-configured',
   webClientId: googleAuthClientIds.web || 'google-web-client-not-configured',
+  redirectUri: googleAuthRedirectUri,
 };
