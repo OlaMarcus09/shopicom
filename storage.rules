@@ -2,7 +2,7 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    match /listings/{userId}/{fileName} {
+    match /listings/{userId}/{listingId}/{fileName} {
       allow read: if true;
       allow create, update: if request.auth != null
         && request.auth.uid == userId

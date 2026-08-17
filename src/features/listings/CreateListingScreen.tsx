@@ -125,10 +125,14 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
       };
       await saveLocalListing(listingInput, currentUser);
       try {
-        await createListing({ ...listingInput, imageUrls: [] });
-        setStatusMessage('Listing saved on this device and synced to your account.');
-      } catch {
-        setStatusMessage('Listing saved on this device. Cloud sync will retry later.');
+        setStatusMessage(`Uploading 0 of ${imageUris.length} photos...`);
+        await createListing(listingInput, ({ completed, total }) => {
+          setStatusMessage(`Uploading ${completed} of ${total} photos...`);
+        });
+        setStatusMessage('Listing and photos saved to your account.');
+      } catch (error) {
+        const reason = error instanceof Error ? ` ${error.message}` : '';
+        setStatusMessage(`Listing saved on this device, but cloud upload failed.${reason}`);
       }
       setTitle('');
       setPrice('');

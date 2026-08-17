@@ -92,7 +92,7 @@ These screens have been adjusted for real Android phone sizes. The interface use
 
 ## Listings: what is already built
 
-The Listings section has been started and is one of the largest areas already implemented. The remaining issue is that parts of it still use local-device storage because Firebase image storage is blocked by billing.
+The Listings section is one of the largest areas already implemented. Listing metadata and image uploads are now connected to Firebase; the new cloud image flow still needs physical-device verification.
 
 ### Listing creation
 
@@ -113,7 +113,7 @@ The Listings section has been started and is one of the largest areas already im
 - [x] Validate required fields.
 - [x] Save the complete listing locally on the phone.
 - [x] Sync listing text and metadata to Firestore.
-- [!] Upload listing images to shared cloud storage.
+- [~] Upload listing images to Firebase Storage is implemented and rules are deployed; physical-device verification remains.
 
 ### Listing browsing and details
 
@@ -129,7 +129,7 @@ The Listings section has been started and is one of the largest areas already im
 - [x] Open the phone dialler when a seller phone number exists.
 - [x] Add and remove local favorites.
 - [x] Return to the correct previous screen after opening a product.
-- [~] Listings created on another device can load their text details from Firestore, but their image shows "Photo unavailable" until image storage is connected.
+- [~] Listings created on another device should now load their Firestore details and Storage images; this requires verification with the new APK on two devices.
 - [~] Hot Selling, ratings and Best Selling are presentation sections. They do not yet use real sales, reviews or popularity scoring.
 
 ### Listing management still required
@@ -147,7 +147,7 @@ The Listings section has been started and is one of the largest areas already im
 - [ ] Sorting and advanced filters.
 - [ ] Report listing flow and moderation record.
 
-Important: deleting or reinstalling the app can remove locally stored images and local-only records. Firestore now stores listing metadata, but the image files cannot survive across devices until cloud image storage is enabled.
+Important: deleting or reinstalling the current APK can still remove local-only records. Listings created after the new Storage-enabled APK is installed should retain their Firestore metadata and cloud images across devices.
 
 ## Chat and Inbox status
 
@@ -229,18 +229,18 @@ The admin dashboard is part of the complete operating product, but it is separat
 
 The `shopicom-limited-dev` project has now been upgraded to Firebase Blaze. The former billing blocker is resolved.
 
-The next work is to create the Storage bucket, deploy the existing Storage rules, connect listing-image uploads, and test images across two devices.
+The Storage bucket and rules are now ready, and listing-image upload code is connected. The next work is physical-device verification across two devices, followed by retry handling and cloud-backed listing management.
 
-### What this blocks
+### Remaining image-dependent work
 
-- Listing images shared between users and devices.
+- Verify listing images shared between users and devices.
 - Profile photos.
 - Vendor logos and cover images.
 - Image messages in Chat.
-- Images surviving app deletion or reinstallation.
-- A reliable standalone demo where the founder and developer see the same product photos.
+- Confirm images survive app deletion or reinstallation.
+- Confirm the founder and developer see the same product photos.
 
-Until that integration is complete, listing images remain device-specific and can still be lost when the app is removed.
+Existing listings created before Storage integration may still have no cloud images. New listings will use the cloud flow after the updated APK is installed.
 
 ## Other dependencies and decisions needed
 
@@ -251,7 +251,7 @@ Until that integration is complete, listing images remain device-specific and ca
 - [x] Optional WhatsApp seller contact is included in the first release.
 - [ ] Confirm who will moderate reports and approve vendors.
 - [ ] Confirm whether the first release needs a separate web admin dashboard.
-- [ ] Provide final Terms, Privacy Policy, Help and About content.
+- [~] Official Privacy, Terms, and Cookie pages are connected; final Help and About content remains.
 - [ ] Confirm Play Store company account access and release ownership.
 
 ## Step-by-step development roadmap
