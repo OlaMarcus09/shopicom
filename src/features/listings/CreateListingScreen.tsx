@@ -13,7 +13,7 @@ import {
 
 import { firebaseAuth } from '../../services/firebase';
 import { enabledMarketplaceSections, getMarketplaceSection } from '../../config/category-taxonomy';
-import { saveLocalListing } from './local-listing-service';
+import { linkLocalListingToCloud, saveLocalListing } from './local-listing-service';
 import { createListing } from './listing-service';
 
 function SelectField({ label, value, options, onChange }: { label?: string; value: string; options: string[]; onChange: (value: string) => void }) {
@@ -123,12 +123,17 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         description: description.trim(),
         imageUrls: imageUris,
       };
-      await saveLocalListing(listingInput, currentUser);
+      const localListing = await saveLocalListing(listingInput, currentUser);
       try {
         setStatusMessage(`Uploading 0 of ${imageUris.length} photos...`);
-        await createListing(listingInput, ({ completed, total }) => {
+        const cloudListing = await createListing(listingInput, ({ completed, total }) => {
           setStatusMessage(`Uploading ${completed} of ${total} photos...`);
         });
+        await linkLocalListingToCloud(
+          localListing.id,
+          cloudListing.id,
+          cloudListing.imageUrls,
+        );
         setStatusMessage('Listing and photos saved to your account.');
       } catch (error) {
         const reason = error instanceof Error ? ` ${error.message}` : '';

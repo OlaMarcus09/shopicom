@@ -1,18 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { deleteLocalListing, getLocalListings, type LocalListing } from './local-listing-service';
+import { deleteLocalListing, type LocalListing } from './local-listing-service';
+import { deleteCloudListing, getMyListings } from './listing-service';
 
 export function MyListingsScreen({ onBack, onOpenListing }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void }) {
   const [listings, setListings] = useState<LocalListing[]>([]);
   const { width } = useWindowDimensions();
   const cardWidth = (width - 42) / 2;
 
-  useEffect(() => { getLocalListings().then(setListings).catch(() => setListings([])); }, []);
+  useEffect(() => { getMyListings().then(setListings).catch(() => setListings([])); }, []);
   function confirmDelete(listing: LocalListing) {
-    Alert.alert('Delete listing?', `Remove “${listing.title}” from this device?`, [
+    Alert.alert('Delete listing?', `Remove “${listing.title}” from your account and this device?`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => { await deleteLocalListing(listing.id); setListings((current) => current.filter((item) => item.id !== listing.id)); } },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          if (listing.cloudId) {
+            await deleteCloudListing(
+              listing.cloudId,
+              listing.cloudImageUrls || listing.imageUrls,
+            );
+          }
+          await deleteLocalListing(listing.id);
+          setListings((current) => current.filter((item) => item.id !== listing.id));
+        } catch (error) {
+          Alert.alert(
+            'Unable to delete listing',
+            error instanceof Error ? error.message : 'Please try again.',
+          );
+        }
+      } },
     ]);
   }
 

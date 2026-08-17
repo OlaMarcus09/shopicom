@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -124,7 +125,72 @@ export async function createListing(
     throw error;
   }
 
-  return listingReference;
+  return {
+    id: listingReference.id,
+    imageUrls,
+  };
+}
+
+export async function getMyListings(): Promise<LocalListing[]> {
+  const user = firebaseAuth.currentUser;
+  if (!user) return [];
+
+  const local = (await getLocalListings()).filter(
+    (listing) => listing.sellerId === user.uid,
+  );
+
+  try {
+    const snapshot = await getDocs(
+      query(listingsCollection, where('sellerId', '==', user.uid)),
+    );
+    const cloud = snapshot.docs
+      .map((document) => {
+        const listing = document.data() as Omit<MarketplaceListing, 'id'>;
+        return {
+          ...listing,
+          id: document.id,
+          cloudId: document.id,
+          cloudImageUrls: listing.imageUrls,
+          createdAt:
+            listing.createdAt?.toDate().toISOString() || new Date().toISOString(),
+          status: 'active' as const,
+        } satisfies LocalListing;
+      })
+      .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+
+    const linkedCloudIds = new Set(
+      local.map((listing) => listing.cloudId).filter(Boolean),
+    );
+    const localKeys = new Set(
+      local.map(
+        (listing) => `${listing.sellerId}:${listing.title}:${listing.price}`,
+      ),
+    );
+    const cloudOnly = cloud.filter(
+      (listing) =>
+        !linkedCloudIds.has(listing.cloudId) &&
+        !localKeys.has(`${listing.sellerId}:${listing.title}:${listing.price}`),
+    );
+
+    return [...local, ...cloudOnly];
+  } catch {
+    return local;
+  }
+}
+
+export async function deleteCloudListing(
+  listingId: string,
+  imageUrls: string[],
+) {
+  const user = firebaseAuth.currentUser;
+  if (!user) {
+    throw new Error('Log in again before deleting this listing.');
+  }
+
+  await Promise.allSettled(
+    imageUrls.map((imageUrl) => deleteObject(ref(firebaseStorage, imageUrl))),
+  );
+  await deleteDoc(doc(listingsCollection, listingId));
 }
 
 export async function getLatestListings(maximum = 20) {

@@ -8,6 +8,8 @@ const LOCAL_FAVORITES_KEY = '@shopicom/local-favorites';
 
 export type LocalListing = CreateListingInput & {
   id: string;
+  cloudId?: string;
+  cloudImageUrls?: string[];
   sellerId: string;
   sellerName: string;
   sellerEmail: string | null;
@@ -33,6 +35,24 @@ export async function saveLocalListing(input: CreateListingInput, user: User) {
   );
 
   return listing;
+}
+
+export async function linkLocalListingToCloud(
+  localListingId: string,
+  cloudId: string,
+  cloudImageUrls: string[],
+) {
+  const listings = await getLocalListings();
+  await AsyncStorage.setItem(
+    LOCAL_LISTINGS_KEY,
+    JSON.stringify(
+      listings.map((listing) =>
+        listing.id === localListingId
+          ? { ...listing, cloudId, cloudImageUrls }
+          : listing,
+      ),
+    ),
+  );
 }
 
 export async function getLocalListings(): Promise<LocalListing[]> {
