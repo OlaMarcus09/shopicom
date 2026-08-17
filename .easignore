@@ -1,0 +1,36 @@
+# Dependencies and generated output
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+/ios
+/android
+.kotlin/
+*.tsbuildinfo
+
+# Local environment and Firebase configuration
+.env
+.env.*
+!.env.example
+.firebase/
+
+# Credentials and local tooling files
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+*.orig.*
+.DS_Store
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+firebase-debug.log*
+
+# Design references and unrelated root images are not required at runtime
+docs/figma/
+/0C65DC29-ACA4-4C6A-8D15-4F32423820C1.jpeg
+/86AC440D-11DA-4081-B7F2-E0A686F8916B.jpeg
