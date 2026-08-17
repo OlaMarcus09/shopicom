@@ -48,6 +48,7 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 - Create Listing supports selecting up to 10 photos, removing individual selections, previewing them, saving the listing locally, and syncing listing metadata to Firestore.
 - Listing image uploads are now connected: selected photos upload under the authenticated seller and listing ID, and their download URLs are saved in Firestore.
 - Storage rules are deployed from `storage.rules`; the remaining step is physical-device verification with a fresh native APK.
+- My Listings now combines the signed-in seller's cloud listings with local records. New cloud-linked listings can delete their Firestore document and Storage photos together.
 - Firebase is now on the Blaze plan, so the previous billing blocker is resolved.
 
 ## Confirmed MVP scope updates
@@ -78,12 +79,12 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 2. Test Google Sign-In on the physical Android phone.
 3. Create a listing with one or more photos and verify the upload in Storage and the URLs in Firestore.
 4. Verify the same listing and photos from another device or clean app install.
-5. Add cloud-backed listing management and continue release testing.
+5. Continue release testing, then add edit/archive and retry handling.
 
 ## Pending product work
 
 - Replace remaining hardcoded listing/review presentation data with real records.
-- Verify and harden Create Listing image uploads across slow networks and failed uploads.
+- Verify and harden Create Listing image uploads and cloud My Listings deletion across slow networks and failed uploads.
 - Add real search, categories, vendor data, reviews, and messaging.
 - Phone authentication remains intentionally deferred. Google authentication is implemented and awaiting a fresh APK verification after the redirect fix.
 

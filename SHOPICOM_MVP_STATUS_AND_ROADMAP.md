@@ -136,9 +136,9 @@ The Listings section is one of the largest areas already implemented. Listing me
 
 - [x] Local My Listings screen.
 - [x] Local listing deletion with confirmation.
-- [ ] Cloud-backed My Listings query.
+- [~] Cloud-backed My Listings query is implemented and awaits physical-device verification.
 - [ ] Edit an existing listing.
-- [ ] Delete or archive a listing in Firestore.
+- [~] Delete a cloud-linked listing in Firestore and Storage is implemented; archive and physical-device verification remain.
 - [ ] Mark a listing as sold.
 - [ ] Draft listing autosave and recovery.
 - [ ] Upload progress, retry and failed-upload handling.
