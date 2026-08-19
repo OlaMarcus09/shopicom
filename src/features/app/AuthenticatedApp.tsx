@@ -47,7 +47,7 @@ type AuthenticatedAppProps = {
 };
 
 function TabIcon({ active, tab }: { active: boolean; tab: AppTab }) {
-  const color = active ? '#F45100' : '#777777';
+  const color = active ? '#FFFFFF' : '#777777';
 
   if (tab === 'add') {
     return <Text style={[styles.addIcon, { color }]}>+</Text>;
@@ -67,7 +67,7 @@ function TabIcon({ active, tab }: { active: boolean; tab: AppTab }) {
   }
 
   if (tab === 'home') {
-    return <Text style={[styles.homeIcon, { color: active ? '#FFFFFF' : color }]}>⌂</Text>;
+    return <Text style={[styles.homeIcon, { color }]}>⌂</Text>;
   }
 
   if (tab === 'inbox') {
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     width: '20%',
-    height: 56,
+    height: 60,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
@@ -304,18 +304,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   activeTabCircle: {
-    width: 48,
-    height: 48,
-    marginTop: -20,
-    borderWidth: 4,
+    width: 38,
+    height: 38,
+    marginTop: 0,
+    borderWidth: 3,
     borderColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 19,
     backgroundColor: '#F45100',
     shadowColor: '#F45100',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
-    shadowRadius: 7,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   tabLabel: {
     color: '#6E6E6E',

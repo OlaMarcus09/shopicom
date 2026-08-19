@@ -1,7 +1,6 @@
 import { FirebaseError } from 'firebase/app';
 import type { User } from 'firebase/auth';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
+import { GoogleSignin, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -26,9 +25,7 @@ import {
   subscribeToAuthSession,
 } from './auth-service';
 import { AuthenticatedApp } from '../app/AuthenticatedApp';
-import { googleAuthRequestClientIds, isGoogleAuthConfigured } from '../../config/google-auth';
-
-WebBrowser.maybeCompleteAuthSession();
+import { googleAuthClientIds, isGoogleAuthConfigured } from '../../config/google-auth';
 
 type AuthMode = 'login' | 'register';
 type LoginMethod = 'phone' | 'email';
@@ -84,43 +81,16 @@ export function AuthPrototypeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [, googleResponse, promptGoogleSignIn] = Google.useIdTokenAuthRequest({
-    ...googleAuthRequestClientIds,
-    selectAccount: true,
-  });
-
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: googleAuthClientIds.web,
+      offlineAccess: false,
+    });
     return subscribeToAuthSession((nextUser) => {
       setUser(nextUser);
       setIsSessionReady(true);
     });
   }, []);
-
-  useEffect(() => {
-    if (!googleResponse) return;
-    if (googleResponse.type !== 'success') {
-      if (googleResponse.type === 'error') {
-        setErrorMessage(
-          googleResponse.params.error_description ||
-            googleResponse.error?.message ||
-            'Google sign-in could not be completed. Please try again.',
-        );
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    const idToken = googleResponse.params.id_token || googleResponse.authentication?.idToken;
-    if (!idToken) {
-      setErrorMessage('Google did not return a valid sign-in token. Please try again.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    signInWithGoogleIdToken(idToken)
-      .catch((error) => setErrorMessage(getAuthErrorMessage(error)))
-      .finally(() => setIsSubmitting(false));
-  }, [googleResponse]);
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
@@ -156,9 +126,22 @@ export function AuthPrototypeScreen() {
     }
     setIsSubmitting(true);
     try {
-      await promptGoogleSignIn();
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const result = await GoogleSignin.signIn();
+      if (result.type !== 'success' || !result.data.idToken) {
+        setErrorMessage('Google sign-in was cancelled.');
+        return;
+      }
+      await signInWithGoogleIdToken(result.data.idToken);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to open Google sign-in.');
+      if (isErrorWithCode(error) && error.code === statusCodes.SIGN_IN_CANCELLED) {
+        setErrorMessage('Google sign-in was cancelled.');
+      } else if (isErrorWithCode(error) && error.code === statusCodes.IN_PROGRESS) {
+        setErrorMessage('Google sign-in is already in progress.');
+      } else {
+        setErrorMessage(getAuthErrorMessage(error));
+      }
+    } finally {
       setIsSubmitting(false);
     }
   }

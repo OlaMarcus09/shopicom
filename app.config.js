@@ -14,7 +14,12 @@ module.exports = {
   scheme: googleRedirectScheme
     ? [expo.scheme, googleRedirectScheme]
     : expo.scheme,
-  plugins: [...(expo.plugins ?? []), 'expo-web-browser'],
+  plugins: [
+    ...(expo.plugins ?? []),
+    'expo-web-browser',
+    '@react-native-community/datetimepicker',
+    '@react-native-google-signin/google-signin',
+  ],
   android: {
     ...expo.android,
     googleServicesFile:
