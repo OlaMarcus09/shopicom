@@ -19,17 +19,15 @@ const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
 };
 
-type CategoryKind = 'products' | 'food' | 'hotels' | 'services' | 'jobs' | 'property';
+type CategoryKind = 'food' | 'hotels' | 'services' | 'jobs' | 'property';
 
-const allCategories: Array<{ feature: MarketplaceFeature; kind: CategoryKind; label: string }> = [
-  { feature: 'products', kind: 'products', label: 'Products' },
-  { feature: 'services', kind: 'services', label: 'Services' },
+const categories: Array<{ feature: MarketplaceFeature; kind: CategoryKind; label: string }> = [
+  { feature: 'services', kind: 'services', label: 'Service' },
   { feature: 'hotels', kind: 'hotels', label: 'Hotels' },
-  { feature: 'jobs', kind: 'jobs', label: 'Jobs' },
   { feature: 'food', kind: 'food', label: 'Food' },
   { feature: 'property', kind: 'property', label: 'Property' },
+  { feature: 'jobs', kind: 'jobs', label: 'Jobs' },
 ];
-const categories = allCategories.filter((item) => marketplaceFeatures[item.feature]);
 
 const discoveryFilters = [
   'Recommend',
@@ -56,7 +54,6 @@ function BellIcon() {
 }
 
 function CategoryIcon({ kind }: { kind: CategoryKind }) {
-  if (kind === 'products') return <View style={styles.categoryIconBox}><View style={styles.productBox} /><View style={styles.productBoxLine} /></View>;
   if (kind === 'food') {
     return (
       <View style={styles.categoryIconBox}>
@@ -97,10 +94,12 @@ function CategoryIcon({ kind }: { kind: CategoryKind }) {
   );
 }
 
-function CategoryShortcut({ kind, label, onPress }: { kind: CategoryKind; label: string; onPress?: () => void }) {
+function CategoryShortcut({ kind, label, enabled, onPress }: { kind: CategoryKind; label: string; enabled: boolean; onPress?: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: !enabled }}
+      disabled={!enabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.categoryCard,
@@ -111,6 +110,7 @@ function CategoryShortcut({ kind, label, onPress }: { kind: CategoryKind; label:
       <Text numberOfLines={1} style={styles.categoryLabel}>
         {label}
       </Text>
+      {!enabled ? <View pointerEvents="none" style={styles.comingSoonOverlay}><Text style={styles.comingSoonLabel}>Coming Soon</Text></View> : null}
     </Pressable>
   );
 }
@@ -205,7 +205,7 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
         showsHorizontalScrollIndicator={false}
       >
         {categories.map((category) => (
-          <CategoryShortcut key={category.kind} {...category} onPress={() => onOpenCategory?.(category.label)} />
+          <CategoryShortcut key={category.kind} {...category} enabled={marketplaceFeatures[category.feature]} onPress={() => onOpenCategory?.(category.label)} />
         ))}
       </ScrollView>
 
@@ -391,6 +391,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   categoryCard: {
+    position: 'relative',
     width: 100,
     height: 48,
     flexDirection: 'row',
@@ -413,6 +414,22 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 15,
     fontWeight: '600',
+  },
+  comingSoonOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
+  },
+  comingSoonLabel: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
   },
   productBox: { position: 'absolute', left: 3, top: 3, width: 19, height: 18, borderWidth: 2, borderColor: '#5C6BC0', borderRadius: 3 },
   productBoxLine: { position: 'absolute', left: 7, top: 12, width: 12, height: 2, backgroundColor: '#5C6BC0' },
