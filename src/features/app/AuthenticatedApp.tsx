@@ -108,8 +108,7 @@ function BottomTabBar({
           >
             <View
               style={[
-                styles.tabIconContainer,
-                active && styles.tabIconSelected,
+                active ? styles.activeTabCircle : styles.inactiveTabIcon,
               ]}
             >
               <TabIcon active={active} tab={tab.key} />
@@ -297,14 +296,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 3,
   },
-  tabIconContainer: {
+  inactiveTabIcon: {
     width: 32,
     height: 28,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
   },
-  tabIconSelected: {
+  activeTabCircle: {
     width: 48,
     height: 48,
     marginTop: -20,
