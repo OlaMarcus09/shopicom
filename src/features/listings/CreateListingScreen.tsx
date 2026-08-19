@@ -58,9 +58,6 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   const [listingSection, setListingSection] = useState(enabledMarketplaceSections[0]?.label || 'Products');
   const [category, setCategory] = useState('Select Category');
   const [subCategory, setSubCategory] = useState('Select Sub-Category');
-  const [condition, setCondition] = useState('New');
-  const [specType, setSpecType] = useState('');
-  const [brand, setBrand] = useState('');
   const [deliveryOptions, setDeliveryOptions] = useState<Array<'in_store_pickup' | 'local_delivery'>>(['in_store_pickup']);
   const [negotiation, setNegotiation] = useState<'yes' | 'no' | 'not_sure'>('not_sure');
   const selectedSection = getMarketplaceSection(listingSection);
@@ -111,9 +108,6 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         title: title.trim(),
         category,
         subCategory,
-        type: specType.trim() || undefined,
-        brand: brand.trim() || undefined,
-        condition,
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
         location: location.trim(),
@@ -185,13 +179,6 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
           <SelectField label="Category*" value={category} options={selectedSection?.categories.map((item) => item.name) || []} onChange={(value) => { setCategory(value); setSubCategory('Select Sub-Category'); }} />
           <SelectField label="Sub-Category*" value={subCategory} options={selectedCategory ? [...selectedCategory.subcategories] : []} onChange={setSubCategory} />
 
-          <Text style={styles.sectionTitle}>Specifications</Text>
-          <View style={styles.row}>
-            <View style={styles.half}><Text style={styles.smallLabel}>TYPE</Text><TextInput onChangeText={setSpecType} placeholder="Type" placeholderTextColor="#999" style={styles.smallInput} value={specType} /></View>
-            <View style={styles.half}><Text style={styles.smallLabel}>BRAND</Text><TextInput onChangeText={setBrand} placeholder="Brand" placeholderTextColor="#999" style={styles.smallInput} value={brand} /></View>
-          </View>
-
-          <SelectField label="Condition" value={condition} options={['New', 'Used - Like New', 'Used - Good']} onChange={setCondition} />
           <View style={styles.divider} />
 
           <View style={styles.row}>

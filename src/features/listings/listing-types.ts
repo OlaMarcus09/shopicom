@@ -10,7 +10,7 @@ export type CreateListingInput = {
   subCategory: string;
   type?: string;
   brand?: string;
-  condition: string;
+  condition?: string;
   price: number;
   discount?: number;
   location: string;

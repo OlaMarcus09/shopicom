@@ -12,7 +12,7 @@ service cloud.firestore {
 
     function hasValidListingFields() {
       return request.resource.data.keys().hasAll([
-          'title', 'category', 'subCategory', 'condition', 'price',
+          'title', 'category', 'subCategory', 'price',
           'location', 'deliveryOptions', 'negotiation', 'description',
           'imageUrls', 'sellerId', 'sellerName', 'sellerEmail', 'status',
           'createdAt', 'updatedAt'
@@ -22,7 +22,6 @@ service cloud.firestore {
         && request.resource.data.title.size() <= 120
         && request.resource.data.category is string
         && request.resource.data.subCategory is string
-        && request.resource.data.condition is string
         && request.resource.data.price is number
         && request.resource.data.price >= 0
         && request.resource.data.location is string
