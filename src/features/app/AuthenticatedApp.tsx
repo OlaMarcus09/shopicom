@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { HomeScreen } from '../home/HomeScreen';
+import { ServicesScreen } from '../home/ServicesScreen';
 import { CategoriesScreen } from '../categories/CategoriesScreen';
 import { CreateListingScreen } from '../listings/CreateListingScreen';
 import { MessagesScreen } from '../messages/MessagesScreen';
@@ -28,7 +29,7 @@ import { EditProfileScreen } from '../profile/EditProfileScreen';
 import { VendorOnboardingScreen } from '../profile/VendorOnboardingScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
-type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search';
+type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search' | 'services';
 
 const tabs: Array<{ key: AppTab; label: string }> = [
   { key: 'add', label: 'Add' },
@@ -184,6 +185,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isListingOpen, setIsListingOpen] = useState(false);
   const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isVendorOpen, setIsVendorOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<LocalListing | undefined>();
   const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
@@ -202,6 +204,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     setIsSearchOpen(false);
     setIsMyListingsOpen(false);
     setIsHotSellingOpen(false);
+    setIsServicesOpen(false);
     setIsNotificationsOpen(false);
     setIsListingOpen(true);
   }
@@ -213,6 +216,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     if (listingOrigin === 'search') setIsSearchOpen(true);
     if (listingOrigin === 'my-listings') setIsMyListingsOpen(true);
     if (listingOrigin === 'hot-selling') setIsHotSellingOpen(true);
+    if (listingOrigin === 'services') setIsServicesOpen(true);
     if (listingOrigin === 'notifications') setIsNotificationsOpen(true);
   }
 
@@ -226,7 +230,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isFavoritesOpen) {
     screen = <FavoritesScreen onBack={() => setIsFavoritesOpen(false)} onOpenListing={(listing) => openListing(listing, 'favorites')} />;
   } else if (isSearchOpen) {
-    screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => openListing(listing, 'search')} />;
+    screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => openListing(listing, 'search')} onOpenServices={() => { setIsSearchOpen(false); setIsServicesOpen(true); }} />;
   } else if (isMyListingsOpen) {
     screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => openListing(listing, 'my-listings')} />;
   } else if (isVendorOpen) {
@@ -235,10 +239,12 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
     screen = <ListingDetailsScreen listing={selectedListing} onBack={closeListing} onChat={() => { setIsListingOpen(false); setIsHotSellingOpen(false); setIsChatOpen(true); }} onOpenVendor={() => setIsVendorOpen(true)} />;
   } else if (isHotSellingOpen) {
     screen = <HotSellingScreen onBack={() => setIsHotSellingOpen(false)} onOpenProduct={(listing) => openListing(listing, 'hot-selling')} />;
+  } else if (isServicesOpen) {
+    screen = <ServicesScreen displayName={props.user.displayName} onBack={() => setIsServicesOpen(false)} onOpenListing={(listing) => openListing(listing, 'services')} onOpenSearch={() => { setIsServicesOpen(false); setIsSearchOpen(true); }} />;
   } else if (isChatOpen) {
     screen = <ChatScreen listing={selectedListing} onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
-    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { setCategoryFilter(category); setActiveTab('categories'); }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenProfile={() => setActiveTab('profile')} onOpenSearch={() => setIsSearchOpen(true)} />;
+    screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { if (category === 'Service') setIsServicesOpen(true); else { setCategoryFilter(category); setActiveTab('categories'); } }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenProfile={() => setActiveTab('profile')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
     screen = <CreateListingScreen onClose={() => setActiveTab('home')} />;
   } else if (activeTab === 'categories') {
@@ -254,7 +260,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {isChatOpen || isListingOpen || isHotSellingOpen || isServicesOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }

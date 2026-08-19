@@ -13,7 +13,7 @@ import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
 import { MarketplaceProductCard } from '../listings/MarketplaceProductCard';
 import { marketplaceFeatures, type MarketplaceFeature } from '../../config/marketplace-features';
-import { enabledMarketplaceSections } from '../../config/category-taxonomy';
+import { enabledMarketplaceSections, listingBelongsToSection } from '../../config/category-taxonomy';
 
 const homeAssets = {
   promo: require('../../../assets/home/home-promo-complete-guyman.png'),
@@ -137,10 +137,27 @@ function SectionHeader({
   );
 }
 
-export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenProfile, onOpenSearch }: { displayName?: string | null; onOpenCategory?: (category: string) => void; onOpenHotSelling?: () => void; onOpenListing?: (listing: LocalListing) => void; onOpenNotifications?: () => void; onOpenProfile?: () => void; onOpenSearch?: () => void }) {
+export type HomeScreenProps = {
+  displayName?: string | null;
+  listingScope?: MarketplaceFeature;
+  pageTitle?: string;
+  onBack?: () => void;
+  onOpenCategory?: (category: string) => void;
+  onOpenHotSelling?: () => void;
+  onOpenListing?: (listing: LocalListing) => void;
+  onOpenNotifications?: () => void;
+  onOpenProfile?: () => void;
+  onOpenSearch?: () => void;
+};
+
+export function HomeScreen({ displayName, listingScope, pageTitle = 'Listings', onBack, onOpenCategory, onOpenHotSelling, onOpenListing, onOpenNotifications, onOpenProfile, onOpenSearch }: HomeScreenProps) {
   const [localListings, setLocalListings] = useState<LocalListing[]>([]);
   const [discoveryFilter, setDiscoveryFilter] = useState('Recommend');
-  useEffect(() => { getCombinedListings().then(setLocalListings).catch(() => setLocalListings([])); }, []);
+  useEffect(() => {
+    getCombinedListings()
+      .then((items) => setLocalListings(listingScope ? items.filter((item) => listingBelongsToSection(item.category, listingScope)) : items))
+      .catch(() => setLocalListings([]));
+  }, [listingScope]);
   const initial = displayName?.trim().charAt(0).toUpperCase() || 'A';
   const { width: screenWidth } = useWindowDimensions();
   const promoWidth = Math.max(screenWidth - 28, 0);
@@ -162,6 +179,7 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
+        {onBack ? <Pressable accessibilityLabel="Go back" accessibilityRole="button" hitSlop={10} onPress={onBack} style={styles.backButton}><Text style={styles.backButtonText}>‹</Text></Pressable> : null}
         <Pressable accessibilityLabel="Open profile" accessibilityRole="button" onPress={onOpenProfile} style={styles.avatar}>
           <Text style={styles.avatarText}>{initial}</Text>
         </Pressable>
@@ -198,7 +216,7 @@ export function HomeScreen({ displayName, onOpenCategory, onOpenHotSelling, onOp
         />
       </View>
 
-      <Text style={styles.listingsTitle}>Listings</Text>
+      <Text style={styles.listingsTitle}>{pageTitle}</Text>
       <ScrollView
         contentContainerStyle={styles.categoryRow}
         horizontal
@@ -270,6 +288,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
+  },
+  backButton: {
+    width: 30,
+    height: 42,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginRight: 3,
+  },
+  backButtonText: {
+    color: '#333333',
+    fontSize: 34,
+    lineHeight: 36,
   },
   avatar: {
     width: 42,

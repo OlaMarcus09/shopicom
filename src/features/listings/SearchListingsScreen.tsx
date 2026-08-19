@@ -5,7 +5,7 @@ import type { LocalListing } from './local-listing-service';
 import { getCombinedListings } from './listing-service';
 import { enabledMarketplaceSections, listingBelongsToSection } from '../../config/category-taxonomy';
 
-export function SearchListingsScreen({ onBack, onOpenListing }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void }) {
+export function SearchListingsScreen({ onBack, onOpenListing, onOpenServices }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void; onOpenServices?: () => void }) {
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [listings, setListings] = useState<LocalListing[]>([]);
@@ -30,7 +30,7 @@ export function SearchListingsScreen({ onBack, onOpenListing }: { onBack: () => 
   return <View style={styles.screen}>
     <View style={styles.header}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><View style={styles.search}><Text style={styles.icon}>⌕</Text><TextInput autoFocus onChangeText={setQuery} placeholder="Search products or location" placeholderTextColor="#888" style={styles.input} value={query} />{query ? <Pressable onPress={() => setQuery('')}><Text style={styles.clear}>×</Text></Pressable> : null}</View></View>
     <ScrollView contentContainerStyle={styles.filters} horizontal showsHorizontalScrollIndicator={false}>
-      {filters.map((filter) => <Pressable key={filter} onPress={() => setCategoryFilter(filter)} style={[styles.filter, categoryFilter === filter && styles.filterActive]}><Text numberOfLines={1} style={[styles.filterText, categoryFilter === filter && styles.filterTextActive]}>{filter}</Text></Pressable>)}
+      {filters.map((filter) => <Pressable key={filter} onPress={() => filter === 'Services' && onOpenServices ? onOpenServices() : setCategoryFilter(filter)} style={[styles.filter, categoryFilter === filter && styles.filterActive]}><Text numberOfLines={1} style={[styles.filterText, categoryFilter === filter && styles.filterTextActive]}>{filter}</Text></Pressable>)}
     </ScrollView>
     <Text style={styles.resultCount}>{results.length} {results.length === 1 ? 'result' : 'results'}</Text>
     <ScrollView contentContainerStyle={styles.results} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
