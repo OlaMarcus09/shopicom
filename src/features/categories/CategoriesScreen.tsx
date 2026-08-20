@@ -27,6 +27,9 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
   useEffect(() => { getCombinedListings().then(setListings).catch(() => setListings([])); }, []);
   const selectedSection = getMarketplaceSection(selected);
   const selectedCategory = getCategory(selected)?.category;
+  const selectedSubcategory = enabledMarketplaceSections
+    .flatMap((section) => section.categories)
+    .some((category) => category.subcategories.some((item) => item === selected));
   const visibleTaxonomyItems = selectedSection
     ? selectedSection.categories.map((item) => item.name)
     : selectedCategory
@@ -36,8 +39,11 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
     if (selected === 'Recommend' || selected === 'Trending') return listings;
     const section = getMarketplaceSection(selected);
     if (section) return listings.filter((listing) => listingBelongsToSection(listing.category, section.id));
-    const term = selected.toLowerCase();
-    return listings.filter((listing) => [listing.category, listing.subCategory].some((value) => value?.toLowerCase() === term));
+    const term = selected.trim().toLowerCase();
+    return listings.filter((listing) =>
+      [listing.category, listing.subCategory]
+        .some((value) => value?.trim().toLowerCase() === term),
+    );
   }, [listings, selected]);
 
   return (
@@ -70,7 +76,7 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
               <Text style={styles.title}>{selected}</Text>
               <Text style={styles.viewAll}>View all</Text>
             </View>
-            {matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.grid}>
+            {matches.length || selectedSubcategory ? (matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.noMatches}><Text style={styles.noMatchesTitle}>No {selected} listings yet</Text><Text style={styles.noMatchesCopy}>Listings posted under this subcategory will appear here.</Text></View>) : <View style={styles.grid}>
               {visibleTaxonomyItems.map((item) => (
                 <Pressable key={item} onPress={() => setSelected(item)} style={styles.tile}>
                   <View style={styles.icon}><Text style={styles.iconText}>◈</Text></View>
@@ -111,4 +117,5 @@ const styles = StyleSheet.create({
   iconText: { color: '#F45100', fontSize: 27, fontWeight: '800' },
   tileLabel: { color: '#4C4647', fontSize: 12, lineHeight: 15, textAlign: 'center', fontWeight: '600' },
   productList: { gap: 10 }, productCard: { flexDirection: 'row', borderWidth: 1, borderColor: '#EEE', borderRadius: 12, overflow: 'hidden' }, productImage: { width: 78, height: 82, backgroundColor: '#F7F7F7' }, productCopy: { flex: 1, justifyContent: 'center', paddingHorizontal: 10 }, productName: { color: '#222', fontSize: 13, fontWeight: '700' }, productPrice: { color: '#F45100', fontSize: 13, fontWeight: '800', marginTop: 5 }, productLocation: { color: '#777', fontSize: 10, marginTop: 5 },
+  noMatches: { alignItems: 'center', paddingTop: 100, paddingHorizontal: 12 }, noMatchesTitle: { color: '#222', fontSize: 16, fontWeight: '800', textAlign: 'center' }, noMatchesCopy: { color: '#777', fontSize: 12, lineHeight: 17, textAlign: 'center', marginTop: 8 },
 });
