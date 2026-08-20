@@ -30,3 +30,9 @@ export type MarketplaceListing = CreateListingInput & {
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 };
+
+export type ListingPerformance = {
+  views: number;
+  favorites: number;
+  inquiries: number;
+};

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from 'firebase/auth';
 
-import type { CreateListingInput } from './listing-types';
+import type { CreateListingInput, ListingStatus } from './listing-types';
 
 const LOCAL_LISTINGS_KEY = '@shopicom/local-listings';
 const LOCAL_FAVORITES_KEY = '@shopicom/local-favorites';
@@ -14,7 +14,7 @@ export type LocalListing = CreateListingInput & {
   sellerName: string;
   sellerEmail: string | null;
   createdAt: string;
-  status: 'active';
+  status: ListingStatus;
 };
 
 export async function saveLocalListing(input: CreateListingInput, user: User) {

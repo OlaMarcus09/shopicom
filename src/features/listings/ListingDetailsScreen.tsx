@@ -4,6 +4,7 @@ import type { LocalListing } from './local-listing-service';
 import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
 import { getCloudSellerProfile } from '../profile/cloud-profile-service';
 import { openWhatsApp } from '../profile/whatsapp';
+import { recordListingInquiry, recordListingView, setCloudListingFavorite } from './listing-service';
 
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
@@ -12,7 +13,11 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   const [isFavorite, setIsFavorite] = useState(false);
   const [whatsappContact, setWhatsappContact] = useState<string | undefined>();
   const { width } = useWindowDimensions();
-  useEffect(() => { if (listing) getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined); }, [listing]);
+  useEffect(() => {
+    if (!listing) return;
+    getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined);
+    recordListingView(listing.cloudId).catch(() => undefined);
+  }, [listing]);
   useEffect(() => { setWhatsappContact(undefined); if (listing?.sellerId) getCloudSellerProfile(listing.sellerId).then((profile) => setWhatsappContact(profile?.whatsappContact)).catch(() => undefined); }, [listing?.sellerId]);
   async function shareListing() {
     const title = listing?.title || 'Ultra smart watch';
@@ -43,7 +48,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Pressable hitSlop={8} onPress={shareListing}><Text style={styles.share}>⌯</Text></Pressable><Pressable disabled={!listing} onPress={async () => { if (listing) setIsFavorite(await toggleLocalFavorite(listing.id)); }}><Text style={[styles.heart, isFavorite && styles.heartActive]}>{isFavorite ? '♥' : '♡'}</Text></Pressable></View></View>
+        <View style={styles.topActions}><Pressable onPress={onBack}><Text style={styles.action}>‹</Text></Pressable><View style={styles.actionRow}><Pressable hitSlop={8} onPress={shareListing}><Text style={styles.share}>⌯</Text></Pressable><Pressable disabled={!listing} onPress={async () => { if (listing) { const next = await toggleLocalFavorite(listing.id); setIsFavorite(next); setCloudListingFavorite(listing.cloudId, next).catch(() => undefined); } }}><Text style={[styles.heart, isFavorite && styles.heartActive]}>{isFavorite ? '♥' : '♡'}</Text></Pressable></View></View>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(event) => setActiveImage(Math.round(event.nativeEvent.contentOffset.x / width))}>
           {imageSources.map((source, index) => <Image key={index} resizeMode="contain" source={source} style={[styles.hero, { width }]} />)}
         </ScrollView>
@@ -55,7 +60,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
           <View style={styles.priceRow}><Text style={styles.price}>GHS {listing?.price ?? 200}</Text>{listing?.discount ? <Text style={styles.discount}>-{listing.discount}%</Text> : <><Text style={styles.oldPrice}>GHS 250</Text><Text style={styles.discount}>-25%</Text></>}</View>
           <Text style={styles.location}>⌖  {listing?.location || 'Banvum Tamale'}</Text>
           <Text style={styles.rating}>★★★★★  <Text style={styles.ratingCopy}>0.0   (0 reviews)</Text></Text>
-          <View style={styles.contactRow}><Pressable onPress={callSeller} style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={onChat} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable>{whatsappContact ? <Pressable onPress={() => openWhatsApp(whatsappContact, listing?.title || 'this listing')} style={styles.whatsapp}><Text style={styles.contactText}>WhatsApp</Text></Pressable> : null}</View>
+          <View style={styles.contactRow}><Pressable onPress={callSeller} style={styles.call}><Text style={styles.contactText}>☎  Call</Text></Pressable><Pressable onPress={() => { recordListingInquiry(listing?.cloudId).catch(() => undefined); onChat(); }} style={styles.message}><Text style={styles.contactText}>◯  Message</Text></Pressable>{whatsappContact ? <Pressable onPress={() => { recordListingInquiry(listing?.cloudId).catch(() => undefined); openWhatsApp(whatsappContact, listing?.title || 'this listing'); }} style={styles.whatsapp}><Text style={styles.contactText}>WhatsApp</Text></Pressable> : null}</View>
         </View>
 
         <View style={styles.section}>

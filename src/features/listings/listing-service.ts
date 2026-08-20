@@ -2,12 +2,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import {
@@ -19,7 +21,7 @@ import {
 } from 'firebase/storage';
 
 import { firebaseAuth, firebaseDb, firebaseStorage } from '../../services/firebase';
-import type { CreateListingInput, MarketplaceListing } from './listing-types';
+import type { CreateListingInput, ListingPerformance, ListingStatus, MarketplaceListing } from './listing-types';
 import type { LocalListing } from './local-listing-service';
 import { getLocalListings } from './local-listing-service';
 
@@ -153,16 +155,21 @@ export async function getMyListings(): Promise<LocalListing[]> {
           cloudImageUrls: listing.imageUrls,
           createdAt:
             listing.createdAt?.toDate().toISOString() || new Date().toISOString(),
-          status: 'active' as const,
+          status: listing.status,
         } satisfies LocalListing;
       })
       .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 
-    const linkedCloudIds = new Set(
-      local.map((listing) => listing.cloudId).filter(Boolean),
-    );
+    const cloudById = new Map(cloud.map((listing) => [listing.cloudId, listing]));
+    const mergedLocal = local.map((listing) => {
+      const cloudListing = listing.cloudId ? cloudById.get(listing.cloudId) : undefined;
+      return cloudListing
+        ? { ...listing, ...cloudListing, id: listing.id, imageUrls: listing.imageUrls }
+        : listing;
+    });
+    const linkedCloudIds = new Set(mergedLocal.map((listing) => listing.cloudId).filter(Boolean));
     const localKeys = new Set(
-      local.map(
+      mergedLocal.map(
         (listing) => `${listing.sellerId}:${listing.title}:${listing.price}`,
       ),
     );
@@ -172,10 +179,58 @@ export async function getMyListings(): Promise<LocalListing[]> {
         !localKeys.has(`${listing.sellerId}:${listing.title}:${listing.price}`),
     );
 
-    return [...local, ...cloudOnly];
+    return [...mergedLocal, ...cloudOnly];
   } catch {
     return local;
   }
+}
+
+function engagementDocument(listingId: string, collectionName: 'favorites' | 'inquiries' | 'views') {
+  const user = firebaseAuth.currentUser;
+  if (!user) return null;
+  return doc(firebaseDb, 'listings', listingId, collectionName, user.uid);
+}
+
+export async function recordListingView(listingId?: string) {
+  if (!listingId) return;
+  const reference = engagementDocument(listingId, 'views');
+  if (!reference) return;
+  await setDoc(reference, { userId: firebaseAuth.currentUser?.uid, createdAt: serverTimestamp() });
+}
+
+export async function recordListingInquiry(listingId?: string) {
+  if (!listingId) return;
+  const reference = engagementDocument(listingId, 'inquiries');
+  if (!reference) return;
+  await setDoc(reference, { userId: firebaseAuth.currentUser?.uid, createdAt: serverTimestamp() });
+}
+
+export async function setCloudListingFavorite(listingId: string | undefined, favorite: boolean) {
+  if (!listingId) return;
+  const reference = engagementDocument(listingId, 'favorites');
+  if (!reference) return;
+  if (favorite) await setDoc(reference, { userId: firebaseAuth.currentUser?.uid, createdAt: serverTimestamp() });
+  else await deleteDoc(reference);
+}
+
+export async function getListingPerformance(listingId: string): Promise<ListingPerformance> {
+  const [views, favorites, inquiries] = await Promise.all([
+    getCountFromServer(collection(firebaseDb, 'listings', listingId, 'views')),
+    getCountFromServer(collection(firebaseDb, 'listings', listingId, 'favorites')),
+    getCountFromServer(collection(firebaseDb, 'listings', listingId, 'inquiries')),
+  ]);
+  return {
+    views: views.data().count,
+    favorites: favorites.data().count,
+    inquiries: inquiries.data().count,
+  };
+}
+
+export async function updateListingStatus(listingId: string, status: ListingStatus) {
+  await updateDoc(doc(listingsCollection, listingId), {
+    status,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function deleteCloudListing(
@@ -216,6 +271,8 @@ export async function getCombinedListings(maximum = 20): Promise<LocalListing[]>
     const localCloudKeys = new Set(local.map((item) => `${item.sellerId}:${item.title}:${item.price}`));
     const cloudOnly = cloud.filter((item) => !localCloudKeys.has(`${item.sellerId}:${item.title}:${item.price}`)).map((item) => ({
       ...item,
+      cloudId: item.id,
+      cloudImageUrls: item.imageUrls,
       createdAt: item.createdAt?.toDate().toISOString() || new Date().toISOString(),
       status: 'active' as const,
     }));

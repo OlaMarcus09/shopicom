@@ -50,6 +50,19 @@ service cloud.firestore {
         && hasValidListingFields();
 
       allow delete: if isOwner(resource.data);
+
+      match /{engagementType}/{userId} {
+        allow read: if isSignedIn()
+          && get(/databases/$(database)/documents/listings/$(listingId)).data.sellerId == request.auth.uid;
+        allow create, update: if isSignedIn()
+          && request.auth.uid == userId
+          && engagementType in ['views', 'favorites', 'inquiries']
+          && request.resource.data.userId == userId
+          && request.resource.data.createdAt == request.time;
+        allow delete: if isSignedIn()
+          && request.auth.uid == userId
+          && engagementType == 'favorites';
+      }
     }
 
     match /profiles/{userId} {
