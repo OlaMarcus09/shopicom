@@ -106,11 +106,7 @@ function BottomTabBar({
             onPress={() => onSelect(tab.key)}
             style={styles.tabButton}
           >
-            <View
-              style={[
-                active ? styles.activeTabCircle : styles.inactiveTabIcon,
-              ]}
-            >
+            <View style={[styles.tabIconSlot, active && styles.activeTabCircle]}>
               <TabIcon active={active} tab={tab.key} />
             </View>
             <Text
@@ -291,37 +287,27 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     width: '20%',
-    height: 60,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    paddingTop: 4,
   },
-  inactiveTabIcon: {
-    width: 32,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-  },
-  activeTabCircle: {
+  tabIconSlot: {
     width: 38,
     height: 38,
-    marginTop: 0,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 19,
+  },
+  activeTabCircle: {
     backgroundColor: '#F45100',
-    shadowColor: '#F45100',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
   },
   tabLabel: {
     color: '#6E6E6E',
     fontSize: 10,
     lineHeight: 13,
     fontWeight: '600',
+    marginTop: 1,
   },
   tabLabelSelected: {
     color: '#F45100',
