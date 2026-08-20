@@ -27,6 +27,7 @@ import { FavoritesScreen } from '../listings/FavoritesScreen';
 import { NotificationsScreen } from '../notifications/NotificationsScreen';
 import { EditProfileScreen } from '../profile/EditProfileScreen';
 import { VendorOnboardingScreen } from '../profile/VendorOnboardingScreen';
+import { PolicyScreen } from '../profile/PolicyScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search' | 'services';
@@ -189,6 +190,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isVendorOnboardingOpen, setIsVendorOnboardingOpen] = useState(false);
+  const [policyOpen, setPolicyOpen] = useState<'privacy' | 'terms' | null>(null);
 
   function openListing(listing: LocalListing | undefined, origin: ListingOrigin) {
     setSelectedListing(listing);
@@ -214,7 +216,9 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   }
 
   let screen;
-  if (isVendorOnboardingOpen) {
+  if (policyOpen) {
+    screen = <PolicyScreen kind={policyOpen} onBack={() => setPolicyOpen(null)} />;
+  } else if (isVendorOnboardingOpen) {
     screen = <VendorOnboardingScreen onBack={() => setIsVendorOnboardingOpen(false)} user={props.user} />;
   } else if (isEditProfileOpen) {
     screen = <EditProfileScreen onBack={() => setIsEditProfileOpen(false)} user={props.user} />;
@@ -245,7 +249,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'inbox') {
     screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={() => setIsChatOpen(true)} />;
   } else if (activeTab === 'profile') {
-    screen = <ProfileDetailsScreen {...props} onOpenEditProfile={() => setIsEditProfileOpen(true)} onOpenFavorites={() => setIsFavoritesOpen(true)} onOpenMyListings={() => setIsMyListingsOpen(true)} onOpenVendorOnboarding={() => setIsVendorOnboardingOpen(true)} />;
+    screen = <ProfileDetailsScreen {...props} onOpenEditProfile={() => setIsEditProfileOpen(true)} onOpenFavorites={() => setIsFavoritesOpen(true)} onOpenMyListings={() => setIsMyListingsOpen(true)} onOpenVendorOnboarding={() => setIsVendorOnboardingOpen(true)} onOpenPolicy={setPolicyOpen} />;
   } else {
     screen = <PlaceholderScreen label={tabs.find((tab) => tab.key === activeTab)?.label ?? ''} />;
   }
@@ -253,7 +257,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {isChatOpen || isListingOpen || isHotSellingOpen || isServicesOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {policyOpen || isChatOpen || isListingOpen || isHotSellingOpen || isServicesOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }

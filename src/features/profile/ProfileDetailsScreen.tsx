@@ -1,35 +1,25 @@
 import type { User } from 'firebase/auth';
-import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getLocalProfile, type LocalProfile } from './local-profile-service';
 
-type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; onOpenVendorOnboarding: () => void; user: User };
+type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; onOpenVendorOnboarding: () => void; onOpenPolicy: (kind: 'privacy' | 'terms') => void; user: User };
 
 const accountItems = ['My Listings', 'Become a Vendor', 'Favorites', 'Edit Profile', 'Privacy & Security'];
 const supportItems = ['Help & Support', 'Privacy Policy', 'Terms of Service', 'Cookie Policy', 'App Settings'];
 const aboutItems = ['About Shopicom', 'Rate us on playstore'];
 
-const policyUrls: Record<string, string> = {
-  'Privacy Policy': 'https://shopicomltd.online/privacy-policy',
-  'Terms of Service': 'https://shopicomltd.online/terms-of-service',
-  'Cookie Policy': 'https://shopicomltd.online/cookie-policy',
-};
-
 function MenuCard({ items, onPressItem }: { items: string[]; onPressItem?: (item: string) => void }) {
   return <View style={styles.menuCard}>{items.map((item) => <Pressable key={item} onPress={() => onPressItem?.(item)} style={styles.menuItem}><Text style={styles.menuIcon}>○</Text><Text style={styles.menuLabel}>{item}</Text><Text style={styles.arrow}>›</Text></Pressable>)}</View>;
 }
 
-export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenEditProfile, onOpenFavorites, onOpenMyListings, onOpenVendorOnboarding, user }: Props) {
+export function ProfileDetailsScreen({ errorMessage, isSubmitting, onLogout, onOpenEditProfile, onOpenFavorites, onOpenMyListings, onOpenVendorOnboarding, onOpenPolicy, user }: Props) {
   const [profile, setProfile] = useState<LocalProfile | null>(null);
   useEffect(() => { getLocalProfile(user.uid).then(setProfile).catch(() => setProfile(null)); }, [user.uid]);
   const displayName = profile?.displayName || user.displayName || 'Shopicom User';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'A';
-  async function openSupportItem(item: string) {
-    const url = policyUrls[item];
-    if (url) await WebBrowser.openBrowserAsync(url);
-  }
+  function openSupportItem(item: string) { if (item === 'Privacy Policy') onOpenPolicy('privacy'); if (item === 'Terms of Service') onOpenPolicy('terms'); }
   return <View style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}><Text style={styles.headerTitle}>Profile</Text><Text style={styles.share}>⌯</Text></View>
