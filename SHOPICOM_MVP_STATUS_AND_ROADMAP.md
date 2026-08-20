@@ -391,6 +391,10 @@ Adding any of these changes the delivery estimate and should be planned as a sep
 - [ ] Confirm whether the web admin dashboard is required before public testing.
 - [ ] Review and approve this roadmap or mark any priority changes.
 
+## Taxonomy update
+
+The exact founder-provided 16-category taxonomy is now implemented as shared nested data. Home, Categories, Create Listing, Vendor onboarding, and Search consume the same source. Item types are persisted on listings through the existing optional `type` field. Repair & Construction is intentionally under Products for now and should be reviewed before the Services catalogue is expanded.
+
 ## My next development order
 
 Unless we agree to change the priority, I will proceed in this order:

@@ -175,7 +175,7 @@ export function VendorOnboardingScreen({ onBack, user }: { onBack: () => void; u
         <Text style={styles.section}>Business Details</Text>
         <Input label="Business name*" onChangeText={setBusinessName} value={businessName} />
         <SelectField label="Category*" onChange={(value) => { setCategory(value); setSubcategory(''); }} options={businessCategories} value={category} />
-        <SelectField label="Subcategory*" onChange={setSubcategory} options={[...subcategories]} value={subcategory} />
+        <SelectField label="Subcategory*" onChange={setSubcategory} options={subcategories.map((item) => item.name)} value={subcategory} />
         <SelectField label="Business location*" onChange={(value) => setLocationMode(value === 'Use personal address' ? 'same_as_personal' : 'gps')} options={['Use personal address', 'Enter GPS location']} value={locationMode === 'same_as_personal' ? 'Use personal address' : 'Enter GPS location'} />
         {locationMode === 'gps' ? <Input label="GPS coordinates or map link*" onChangeText={setGpsLocation} value={gpsLocation} /> : null}
         <BooleanChoice label="Do you have a physical store?*" onChange={setPhysicalStore} value={physicalStore} />

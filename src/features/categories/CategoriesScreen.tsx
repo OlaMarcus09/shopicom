@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { LocalListing } from '../listings/local-listing-service';
 import { getCombinedListings } from '../listings/listing-service';
 import type { MarketplaceFeature } from '../../config/marketplace-features';
-import { enabledMarketplaceSections, getCategory, getMarketplaceSection, listingBelongsToSection } from '../../config/category-taxonomy';
+import { enabledMarketplaceSections, getCategory, getMarketplaceSection, getSubcategory, isMarketplaceItemType, listingBelongsToSection } from '../../config/category-taxonomy';
 
 const categories = enabledMarketplaceSections.flatMap((section) => [
   { label: section.label, feature: section.id as MarketplaceFeature },
@@ -27,13 +27,17 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
   useEffect(() => { getCombinedListings().then(setListings).catch(() => setListings([])); }, []);
   const selectedSection = getMarketplaceSection(selected);
   const selectedCategory = getCategory(selected)?.category;
-  const selectedSubcategory = enabledMarketplaceSections
-    .flatMap((section) => section.categories)
-    .some((category) => category.subcategories.some((item) => item === selected));
+  const selectedSubcategory = getSubcategory(selected)?.subcategory;
+  const showListingResults = selected === 'Recommend'
+    || selected === 'Trending'
+    || Boolean(selectedSubcategory && selectedSubcategory.itemTypes.length === 0)
+    || isMarketplaceItemType(selected);
   const visibleTaxonomyItems = selectedSection
     ? selectedSection.categories.map((item) => item.name)
     : selectedCategory
-      ? [...selectedCategory.subcategories]
+      ? selectedCategory.subcategories.map((item) => item.name)
+      : selectedSubcategory?.itemTypes.length
+        ? [...selectedSubcategory.itemTypes]
       : enabledMarketplaceSections.map((section) => section.label);
   const matches = useMemo(() => {
     if (selected === 'Recommend' || selected === 'Trending') return listings;
@@ -41,7 +45,7 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
     if (section) return listings.filter((listing) => listingBelongsToSection(listing.category, section.id));
     const term = selected.trim().toLowerCase();
     return listings.filter((listing) =>
-      [listing.category, listing.subCategory]
+      [listing.category, listing.subCategory, listing.type]
         .some((value) => value?.trim().toLowerCase() === term),
     );
   }, [listings, selected]);
@@ -76,7 +80,7 @@ export function CategoriesScreen({ initialCategory, onBack, onOpenListing, onOpe
               <Text style={styles.title}>{selected}</Text>
               <Text style={styles.viewAll}>View all</Text>
             </View>
-            {matches.length || selectedSubcategory ? (matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.noMatches}><Text style={styles.noMatchesTitle}>No {selected} listings yet</Text><Text style={styles.noMatchesCopy}>Listings posted under this subcategory will appear here.</Text></View>) : <View style={styles.grid}>
+            {showListingResults ? (matches.length ? <View style={styles.productList}>{matches.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.productCard}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.productImage} /><View style={styles.productCopy}><Text numberOfLines={1} style={styles.productName}>{listing.title}</Text><Text style={styles.productPrice}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.productLocation}>⌖ {listing.location}</Text></View></Pressable>)}</View> : <View style={styles.noMatches}><Text style={styles.noMatchesTitle}>No {selected} listings yet</Text><Text style={styles.noMatchesCopy}>Listings posted under this selection will appear here.</Text></View>) : <View style={styles.grid}>
               {visibleTaxonomyItems.map((item) => (
                 <Pressable key={item} onPress={() => setSelected(item)} style={styles.tile}>
                   <View style={styles.icon}><Text style={styles.iconText}>◈</Text></View>

@@ -58,10 +58,12 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
   const [listingSection, setListingSection] = useState(enabledMarketplaceSections[0]?.label || 'Products');
   const [category, setCategory] = useState('Select Category');
   const [subCategory, setSubCategory] = useState('Select Sub-Category');
+  const [itemType, setItemType] = useState('');
   const [deliveryOptions, setDeliveryOptions] = useState<Array<'in_store_pickup' | 'local_delivery'>>(['in_store_pickup']);
   const [negotiation, setNegotiation] = useState<'yes' | 'no' | 'not_sure'>('not_sure');
   const selectedSection = getMarketplaceSection(listingSection);
   const selectedCategory = selectedSection?.categories.find((item) => item.name === category);
+  const selectedSubcategory = selectedCategory?.subcategories.find((item) => item.name === subCategory);
 
   async function selectImages() {
     setStatusMessage(null);
@@ -108,6 +110,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
         title: title.trim(),
         category,
         subCategory,
+        type: itemType.trim() || undefined,
         price: Number(price),
         discount: discount ? Number(discount) : undefined,
         location: location.trim(),
@@ -139,6 +142,7 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
       setLocation('');
       setDescription('');
       setImageUris([]);
+      setItemType('');
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'Unable to post listing.');
     } finally {
@@ -177,7 +181,8 @@ export function CreateListingScreen({ onClose }: { onClose: () => void }) {
           <TextInput onChangeText={setTitle} placeholder="Ads Title*" placeholderTextColor="#999" style={styles.input} value={title} />
           <SelectField label="Listing Type*" value={listingSection} options={enabledMarketplaceSections.map((section) => section.label)} onChange={(value) => { setListingSection(value); setCategory('Select Category'); setSubCategory('Select Sub-Category'); }} />
           <SelectField label="Category*" value={category} options={selectedSection?.categories.map((item) => item.name) || []} onChange={(value) => { setCategory(value); setSubCategory('Select Sub-Category'); }} />
-          <SelectField label="Sub-Category*" value={subCategory} options={selectedCategory ? [...selectedCategory.subcategories] : []} onChange={setSubCategory} />
+          <SelectField label="Sub-Category*" value={subCategory} options={selectedCategory?.subcategories.map((item) => item.name) || []} onChange={(value) => { setSubCategory(value); setItemType(''); }} />
+          {selectedSubcategory?.itemTypes.length ? <SelectField label="Item type" value={itemType || 'Select item type'} options={[...selectedSubcategory.itemTypes]} onChange={setItemType} /> : null}
 
           <View style={styles.divider} />
 

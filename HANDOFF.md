@@ -59,6 +59,8 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 - Optional seller WhatsApp contact is supported on storefront and listing details.
 - Privacy Policy, Terms of Service, and Cookie Policy open the current official Shopicom pages in an in-app browser.
 - Phone OTP remains deferred; its existing scaffolding is preserved.
+- The founder's full nested taxonomy is now centralized in `src/config/category-taxonomy.ts`, including category, subcategory, and item-type levels. Create Listing saves the selected item type, Categories drills down to item types, and Search filters across all three levels.
+- Repair & Construction remains under Products for this release as requested; confirm later whether it should move under Services.
 
 ## Categories implementation
 

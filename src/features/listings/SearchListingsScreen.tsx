@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 
 import type { LocalListing } from './local-listing-service';
 import { getCombinedListings } from './listing-service';
-import { enabledMarketplaceSections, listingBelongsToSection } from '../../config/category-taxonomy';
+import { enabledMarketplaceSections, getCategory, listingBelongsToSection } from '../../config/category-taxonomy';
 
 export function SearchListingsScreen({ onBack, onOpenListing, onOpenServices }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void; onOpenServices?: () => void }) {
   const [query, setQuery] = useState('');
@@ -16,16 +16,18 @@ export function SearchListingsScreen({ onBack, onOpenListing, onOpenServices }: 
     return listings.filter((listing) => {
       const section = enabledMarketplaceSections.find((item) => item.label === categoryFilter);
       const categoryMatches = categoryFilter === 'All'
-        || (section ? listingBelongsToSection(listing.category, section.id) : listing.category === categoryFilter);
-      const queryMatches = !term || [listing.title, listing.category, listing.subCategory, listing.location, listing.brand].some((value) => value?.toLowerCase().includes(term));
+        || (section ? listingBelongsToSection(listing.category, section.id) : getCategory(categoryFilter)?.category.name === listing.category)
+        || listing.subCategory === categoryFilter
+        || listing.type === categoryFilter;
+      const queryMatches = !term || [listing.title, listing.category, listing.subCategory, listing.type, listing.location, listing.brand].some((value) => value?.toLowerCase().includes(term));
       return categoryMatches && queryMatches;
     });
   }, [categoryFilter, listings, query]);
 
-  const filters = [
+  const filters = [...new Set([
     'All',
-    ...enabledMarketplaceSections.flatMap((section) => [section.label, ...section.categories.map((category) => category.name)]),
-  ];
+    ...enabledMarketplaceSections.flatMap((section) => [section.label, ...section.categories.flatMap((category) => [category.name, ...category.subcategories.flatMap((sub) => [sub.name, ...sub.itemTypes])])]),
+  ])];
 
   return <View style={styles.screen}>
     <View style={styles.header}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><View style={styles.search}><Text style={styles.icon}>⌕</Text><TextInput autoFocus onChangeText={setQuery} placeholder="Search products or location" placeholderTextColor="#888" style={styles.input} value={query} />{query ? <Pressable onPress={() => setQuery('')}><Text style={styles.clear}>×</Text></Pressable> : null}</View></View>
