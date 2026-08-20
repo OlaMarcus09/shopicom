@@ -1,7 +1,7 @@
 # Shopicom mobile app: MVP status, delivery roadmap and current blockers
 
 **Prepared by:** Olawale Marcus  
-**Updated:** 17 August 2026
+**Updated:** 20 August 2026
 **Current build:** Android MVP development and internal preview  
 **Repository:** https://github.com/OlaMarcus09/shopicom.git
 
@@ -47,7 +47,7 @@ The app is not ready for public release yet. The main work remaining is completi
 - [x] Password-reset service foundation.
 - [x] Login and registration validation and error states.
 - [ ] Phone-number authentication and OTP verification.
-- [~] Google sign-in is implemented. The first standalone APK test failed at the Android OAuth redirect; the redirect-scheme fix requires a new APK and physical-phone verification.
+- [~] Google sign-in is implemented with the native Android redirect fix; standalone APK verification is pending.
 - [ ] Email verification flow.
 - [ ] Final password recovery screen and complete user-facing flow.
 
@@ -70,6 +70,7 @@ The app is not ready for public release yet. The main work remaining is completi
 - [x] Notifications screen.
 - [x] Edit Profile.
 - [x] Vendor application screen.
+- [x] In-app Privacy Policy and Terms of Service pages based on the official policy documents.
 
 These screens have been adjusted for real Android phone sizes. The interface uses compact typography, controls and spacing rather than copying oversized Figma dimensions directly.
 
@@ -146,6 +147,13 @@ The Listings section is one of the largest areas already implemented. Listing me
 - [ ] Pagination and pull-to-refresh.
 - [ ] Sorting and advanced filters.
 - [ ] Report listing flow and moderation record.
+
+### Immediate standalone-build verification
+
+- [~] Standalone preview APK submitted through EAS; download and install once the build completes.
+- [ ] Verify Google Sign-In on a physical Android device.
+- [ ] Verify cloud image upload, cross-device listing visibility and cloud deletion.
+- [ ] Review the in-app Privacy Policy and Terms of Service pages on-device.
 
 Important: deleting or reinstalling the current APK can still remove local-only records. Listings created after the new Storage-enabled APK is installed should retain their Firestore metadata and cloud images across devices.
 

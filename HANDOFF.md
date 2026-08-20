@@ -1,7 +1,7 @@
 # Shopicom Mobile — Session Handoff
 
-**Updated:** 2026-08-17
-**Current milestone:** MVP screens and core marketplace flows are implemented; Firebase is now on Blaze and cloud image storage is the next integration milestone.
+**Updated:** 2026-08-20
+**Current milestone:** MVP screens, shared taxonomy, cloud listing foundations, and in-app legal pages are implemented; the next milestone is standalone APK verification and release hardening.
 **Working preference:** Complete and report one bounded step before moving to the next.
 
 ## Project configuration
@@ -12,7 +12,7 @@
 - Android package: `com.shopicom.app`
 - Development APK is installed on the physical Android phone.
 - Email/password Firebase authentication is enabled and physically verified.
-- Google Sign-In is required for MVP. Its OAuth flow is implemented, but the first APK test exposed an Android redirect-scheme error. The native redirect fix is now in the code and requires a fresh APK build and phone test.
+- Google Sign-In is required for MVP. Native Google Sign-In and the Android redirect-scheme fix are in the code; verify them in the new standalone APK.
 - Firebase billing has been upgraded to Blaze. Storage bucket creation and deployment are now unblocked.
 
 ## Completed and verified
@@ -57,7 +57,7 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 - The shared category and subcategory taxonomy drives Create Listing, Categories, and Search filters.
 - The vendor application contains the confirmed personal and business fields and submits with `pending` status.
 - Optional seller WhatsApp contact is supported on storefront and listing details.
-- Privacy Policy, Terms of Service, and Cookie Policy open the current official Shopicom pages in an in-app browser.
+- Privacy Policy and Terms of Service now open as readable in-app pages based on the official PDFs. Cookie Policy still points to the official website page.
 - Phone OTP remains deferred; its existing scaffolding is preserved.
 - The founder's full nested taxonomy is now centralized in `src/config/category-taxonomy.ts`, including category, subcategory, and item-type levels. Create Listing saves the selected item type, Categories drills down to item types, and Search filters across all three levels.
 - Repair & Construction remains under Products for this release as requested; confirm later whether it should move under Services.
@@ -75,20 +75,28 @@ The founder approved the compact Inbox scale as the standard for all remaining s
 - The corrected Categories layout was visually approved on the phone.
 - `docs/figma/assets/Group 38.png` is the saved composite Categories reference. It is not a set of separate category assets.
 
+## Latest session update
+
+- Full founder taxonomy committed and pushed in `d9bc8c7`.
+- In-app Privacy Policy and Terms of Service pages added and pushed in `9607329`.
+- Standalone preview build submitted: [EAS build e0e07cad](https://expo.dev/accounts/shopicmltd/projects/shopicom-mobile/builds/e0e07cad-5141-423f-a067-82418fa72c25).
+- The two official policy PDFs remain in the project root as reference files and are intentionally not committed.
+
 ## Exact next step
 
-1. Build a fresh preview APK containing the Google redirect fix and Storage integration.
+1. Download and install the completed standalone APK from the EAS build page.
 2. Test Google Sign-In on the physical Android phone.
-3. Create a listing with one or more photos and verify the upload in Storage and the URLs in Firestore.
-4. Verify the same listing and photos from another device or clean app install.
-5. Continue release testing, then add edit/archive and retry handling.
+3. Open Profile → Privacy Policy and Terms of Service and check the content.
+4. Create a listing with one or more photos and verify Storage upload and Firestore URLs.
+5. Verify the same listing and photos from another device or clean install.
+6. Continue release testing, then add edit/archive and retry handling.
 
 ## Pending product work
 
 - Replace remaining hardcoded listing/review presentation data with real records.
 - Verify and harden Create Listing image uploads and cloud My Listings deletion across slow networks and failed uploads.
 - Add real search, categories, vendor data, reviews, and messaging.
-- Phone authentication remains intentionally deferred. Google authentication is implemented and awaiting a fresh APK verification after the redirect fix.
+- Phone authentication remains intentionally deferred. Google authentication is implemented and awaiting standalone APK verification.
 
 ## Recent commits
 
