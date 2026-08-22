@@ -11,18 +11,23 @@ import {
   View,
 } from 'react-native';
 import { getLocalChatMessages, saveLocalChatMessage, type LocalChatMessage } from './local-chat-service';
-import { getCloudChatMessages, saveCloudChatMessage } from './cloud-chat-service';
+import { getCloudChatMessages, saveCloudChatMessage, subscribeCloudChatMessages } from './cloud-chat-service';
 import type { LocalListing } from '../listings/local-listing-service';
 
-export function ChatScreen({ listing, onBack, onViewItem }: { listing?: LocalListing; onBack: () => void; onViewItem: () => void }) {
+export function ChatScreen({ conversationId, listing, onBack, onViewItem }: { conversationId?: string; listing?: LocalListing; onBack: () => void; onViewItem: () => void }) {
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<LocalChatMessage[]>([]);
-  useEffect(() => { Promise.all([getLocalChatMessages(), getCloudChatMessages(listing).catch(() => [])]).then(([local, cloud]) => setMessages(cloud.length ? cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() })) : local)).catch(() => setMessages([])); }, [listing]);
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([getLocalChatMessages(), getCloudChatMessages(listing).catch(() => [])]).then(([local, cloud]) => { if (mounted) setMessages(cloud.length ? cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() })) : local); }).catch(() => setMessages([]));
+    const unsubscribe = subscribeCloudChatMessages(listing, (cloud) => { if (mounted) setMessages(cloud.map((message) => ({ id: message.id, text: message.text, createdAt: message.createdAt?.toISOString() || new Date().toISOString() }))); }, undefined, conversationId);
+    return () => { mounted = false; unsubscribe(); };
+  }, [conversationId, listing]);
   async function sendMessage() {
     const text = draft.trim();
     if (!text) return;
     const message = await saveLocalChatMessage(text);
-    saveCloudChatMessage(text, listing).catch(() => undefined);
+    saveCloudChatMessage(text, listing, conversationId).catch(() => undefined);
     setMessages((current) => [...current, message]);
     setDraft('');
   }

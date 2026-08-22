@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getLocalChatMessages } from './local-chat-service';
+import { subscribeCloudConversations, type CloudConversation } from './cloud-chat-service';
 
 type InboxTab = 'All' | 'Unread' | 'Spam';
+type ConversationRow = { id?: string; name: string; message: string; time: string; initial: string; color: string; verified: boolean; unread: boolean; spam: boolean; conversation?: CloudConversation };
 
-export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => void; onOpenConversation: () => void }) {
+export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => void; onOpenConversation: (conversation?: CloudConversation) => void }) {
   const [activeTab, setActiveTab] = useState<InboxTab>('All');
   const [query, setQuery] = useState('');
   const [hasMessages, setHasMessages] = useState(false);
-  useEffect(() => { getLocalChatMessages().then((messages) => setHasMessages(messages.length > 0)).catch(() => setHasMessages(false)); }, []);
-  const conversations = hasMessages ? [{ name: 'Shopicom seller', message: 'Local conversation', time: 'now', image: 0, initial: 'S', color: '#F45100', verified: false, unread: true, spam: false }] : [];
+  const [cloudConversations, setCloudConversations] = useState<CloudConversation[]>([]);
+  useEffect(() => { getLocalChatMessages().then((messages) => setHasMessages(messages.length > 0)).catch(() => setHasMessages(false)); return subscribeCloudConversations(setCloudConversations); }, []);
+  const conversations: ConversationRow[] = cloudConversations.length ? cloudConversations.map((item) => ({ id: item.id, conversation: item, name: item.sellerName, message: item.lastMessage, time: item.updatedAt ? item.updatedAt.toLocaleDateString() : 'now', initial: item.sellerName.charAt(0).toUpperCase(), color: '#F45100', verified: false, unread: false, spam: false })) : (hasMessages ? [{ name: 'Shopicom seller', message: 'Local conversation', time: 'now', initial: 'S', color: '#F45100', verified: false, unread: true, spam: false }] : []);
   const filteredConversations = useMemo(() => conversations.filter((item) => {
     const matchesTab = activeTab === 'All' || (activeTab === 'Unread' && item.unread) || (activeTab === 'Spam' && item.spam);
     const term = query.trim().toLowerCase();
@@ -23,7 +26,7 @@ export function MessagesScreen({ onBack, onOpenConversation }: { onBack: () => v
       </View>
       <View style={styles.tabs}>{(['All', 'Unread', 'Spam'] as InboxTab[]).map((tab) => <Pressable key={tab} onPress={() => setActiveTab(tab)} style={[styles.tabButton, activeTab === tab && styles.activeTab]}><Text style={[styles.tab, activeTab === tab && styles.activeTabText]}>{tab}</Text></Pressable>)}</View>
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {filteredConversations.map((item) => <Pressable key={item.name} onPress={onOpenConversation} style={styles.conversation}><View><Image source={item.image} style={styles.avatarImage} /><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
+        {filteredConversations.map((item) => <Pressable key={item.id || item.name} onPress={() => onOpenConversation(item.conversation)} style={styles.conversation}><View><View style={[styles.initial, { backgroundColor: item.color }]}><Text style={styles.initialText}>{item.initial}</Text></View></View><View style={styles.copy}><View style={styles.nameRow}><Text style={styles.name}>{item.name}</Text>{item.verified ? <Text style={styles.verified}>✓</Text> : null}</View><Text numberOfLines={1} style={styles.message}>{item.message}</Text></View><Text style={styles.time}>{item.time}</Text></Pressable>)}
         {!filteredConversations.length ? <Text style={styles.empty}>No conversations found.</Text> : null}
       </ScrollView>
     </View>

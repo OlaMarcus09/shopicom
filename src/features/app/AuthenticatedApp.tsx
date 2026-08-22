@@ -29,6 +29,8 @@ import { EditProfileScreen } from '../profile/EditProfileScreen';
 import { VendorOnboardingScreen } from '../profile/VendorOnboardingScreen';
 import { PolicyScreen } from '../profile/PolicyScreen';
 import { EditListingScreen } from '../listings/EditListingScreen';
+import { getCombinedListings } from '../listings/listing-service';
+import type { CloudConversation } from '../messages/cloud-chat-service';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search' | 'services';
@@ -178,6 +180,7 @@ function ProfileScreen({
 export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>();
   const [isListingOpen, setIsListingOpen] = useState(false);
   const [isHotSellingOpen, setIsHotSellingOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
@@ -195,6 +198,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [policyOpen, setPolicyOpen] = useState<'privacy' | 'terms' | null>(null);
 
   function openListing(listing: LocalListing | undefined, origin: ListingOrigin) {
+    setSelectedConversationId(undefined);
     setSelectedListing(listing);
     setListingOrigin(origin);
     setIsFavoritesOpen(false);
@@ -243,7 +247,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isServicesOpen) {
     screen = <ServicesScreen displayName={props.user.displayName} onBack={() => setIsServicesOpen(false)} onOpenListing={(listing) => openListing(listing, 'services')} onOpenSearch={() => { setIsServicesOpen(false); setIsSearchOpen(true); }} />;
   } else if (isChatOpen) {
-    screen = <ChatScreen listing={selectedListing} onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
+    screen = <ChatScreen conversationId={selectedConversationId} listing={selectedListing} onBack={() => setIsChatOpen(false)} onViewItem={() => setIsListingOpen(true)} />;
   } else if (activeTab === 'home') {
     screen = <HomeScreen displayName={props.user.displayName} onOpenCategory={(category) => { if (category === 'Service') setIsServicesOpen(true); else { setCategoryFilter(category); setActiveTab('categories'); } }} onOpenHotSelling={() => setIsHotSellingOpen(true)} onOpenListing={(listing) => openListing(listing, 'home')} onOpenNotifications={() => setIsNotificationsOpen(true)} onOpenProfile={() => setActiveTab('profile')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'add') {
@@ -251,7 +255,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (activeTab === 'categories') {
     screen = <CategoriesScreen initialCategory={categoryFilter} onBack={() => setActiveTab('home')} onOpenListing={(listing) => openListing(listing, 'categories')} onOpenSearch={() => setIsSearchOpen(true)} />;
   } else if (activeTab === 'inbox') {
-    screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={() => setIsChatOpen(true)} />;
+    screen = <MessagesScreen onBack={() => setActiveTab('home')} onOpenConversation={async (conversation?: CloudConversation) => { setSelectedConversationId(conversation?.id); if (conversation) { const listings = await getCombinedListings(); const match = listings.find((item) => item.cloudId === conversation.listingId || item.id === conversation.listingId); if (match) setSelectedListing(match); } setIsChatOpen(true); }} />;
   } else if (activeTab === 'profile') {
     screen = <ProfileDetailsScreen {...props} onOpenEditProfile={() => setIsEditProfileOpen(true)} onOpenFavorites={() => setIsFavoritesOpen(true)} onOpenMyListings={() => setIsMyListingsOpen(true)} onOpenVendorOnboarding={() => setIsVendorOnboardingOpen(true)} onOpenPolicy={setPolicyOpen} />;
   } else {
