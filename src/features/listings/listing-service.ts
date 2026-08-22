@@ -43,6 +43,7 @@ async function uploadListingImages(
   listingId: string,
   imageUris: string[],
   onProgress?: (progress: UploadProgress) => void,
+  filePrefix = 'photo',
 ) {
   const uploadedReferences: StorageReference[] = [];
   const imageUrls: string[] = [];
@@ -56,7 +57,7 @@ async function uploadListingImages(
       }
       const imageReference = ref(
         firebaseStorage,
-        `listings/${userId}/${listingId}/photo-${index + 1}.${imageExtension(uri)}`,
+        `listings/${userId}/${listingId}/${filePrefix}-${index + 1}.${imageExtension(uri)}`,
       );
 
       try {
@@ -231,6 +232,26 @@ export async function updateListingStatus(listingId: string, status: ListingStat
     status,
     updatedAt: serverTimestamp(),
   });
+}
+
+export async function updateCloudListing(listingId: string, updates: Partial<CreateListingInput>) {
+  await updateDoc(doc(listingsCollection, listingId), {
+    ...Object.fromEntries(Object.entries(updates).filter(([, value]) => value !== undefined)),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateCloudListingImages(listingId: string, retainedUrls: string[], newImageUris: string[]) {
+  const user = firebaseAuth.currentUser;
+  if (!user) throw new Error('Log in again before updating this listing.');
+  const uploadedUrls = newImageUris.length ? await uploadListingImages(user.uid, listingId, newImageUris, undefined, `edit-${Date.now()}`) : [];
+  const imageUrls = [...retainedUrls, ...uploadedUrls];
+  await updateDoc(doc(listingsCollection, listingId), { imageUrls, updatedAt: serverTimestamp() });
+  return imageUrls;
+}
+
+export async function deleteListingImages(imageUrls: string[]) {
+  await Promise.allSettled(imageUrls.map((imageUrl) => deleteObject(ref(firebaseStorage, imageUrl))));
 }
 
 export async function deleteCloudListing(

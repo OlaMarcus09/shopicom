@@ -92,3 +92,8 @@ export async function deleteLocalListing(listingId: string) {
     AsyncStorage.setItem(LOCAL_FAVORITES_KEY, JSON.stringify(favoriteIds.filter((id) => id !== listingId))),
   ]);
 }
+
+export async function updateLocalListing(listingId: string, updates: Partial<CreateListingInput>) {
+  const listings = await getLocalListings();
+  await AsyncStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(listings.map((listing) => listing.id === listingId ? { ...listing, ...updates } : listing)));
+}

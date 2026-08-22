@@ -28,6 +28,7 @@ import { NotificationsScreen } from '../notifications/NotificationsScreen';
 import { EditProfileScreen } from '../profile/EditProfileScreen';
 import { VendorOnboardingScreen } from '../profile/VendorOnboardingScreen';
 import { PolicyScreen } from '../profile/PolicyScreen';
+import { EditListingScreen } from '../listings/EditListingScreen';
 
 type AppTab = 'add' | 'categories' | 'home' | 'inbox' | 'profile';
 type ListingOrigin = 'categories' | 'favorites' | 'home' | 'hot-selling' | 'my-listings' | 'notifications' | 'search' | 'services';
@@ -190,6 +191,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isVendorOnboardingOpen, setIsVendorOnboardingOpen] = useState(false);
+  const [isEditListingOpen, setIsEditListingOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState<'privacy' | 'terms' | null>(null);
 
   function openListing(listing: LocalListing | undefined, origin: ListingOrigin) {
@@ -218,6 +220,8 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   let screen;
   if (policyOpen) {
     screen = <PolicyScreen kind={policyOpen} onBack={() => setPolicyOpen(null)} />;
+  } else if (isEditListingOpen && selectedListing) {
+    screen = <EditListingScreen listing={selectedListing} onBack={() => setIsEditListingOpen(false)} onSaved={() => setIsEditListingOpen(false)} />;
   } else if (isVendorOnboardingOpen) {
     screen = <VendorOnboardingScreen onBack={() => setIsVendorOnboardingOpen(false)} user={props.user} />;
   } else if (isEditProfileOpen) {
@@ -229,7 +233,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   } else if (isSearchOpen) {
     screen = <SearchListingsScreen onBack={() => setIsSearchOpen(false)} onOpenListing={(listing) => openListing(listing, 'search')} onOpenServices={() => { setIsSearchOpen(false); setIsServicesOpen(true); }} />;
   } else if (isMyListingsOpen) {
-    screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onOpenListing={(listing) => openListing(listing, 'my-listings')} />;
+    screen = <MyListingsScreen onBack={() => setIsMyListingsOpen(false)} onEditListing={(listing) => { setSelectedListing(listing); setIsEditListingOpen(true); }} onOpenListing={(listing) => openListing(listing, 'my-listings')} />;
   } else if (isVendorOpen) {
     screen = <VendorStorefrontScreen listing={selectedListing} onBack={() => setIsVendorOpen(false)} onMessage={() => { setIsVendorOpen(false); setIsListingOpen(false); setIsChatOpen(true); }} onOpenProduct={(listing) => { if (listing) setSelectedListing(listing); setIsVendorOpen(false); }} />;
   } else if (isListingOpen) {
@@ -257,7 +261,7 @@ export function AuthenticatedApp(props: AuthenticatedAppProps) {
   return (
     <View style={styles.app}>
       <View style={styles.screen}>{screen}</View>
-      {policyOpen || isChatOpen || isListingOpen || isHotSellingOpen || isServicesOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
+      {policyOpen || isEditListingOpen || isChatOpen || isListingOpen || isHotSellingOpen || isServicesOpen || isVendorOpen || isMyListingsOpen || isSearchOpen || isFavoritesOpen || isNotificationsOpen || isEditProfileOpen || isVendorOnboardingOpen ? null : <BottomTabBar activeTab={activeTab} onSelect={setActiveTab} />}
     </View>
   );
 }
