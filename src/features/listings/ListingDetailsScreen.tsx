@@ -4,7 +4,7 @@ import type { LocalListing } from './local-listing-service';
 import { getFavoriteListingIds, toggleLocalFavorite } from './local-listing-service';
 import { getCloudSellerProfile } from '../profile/cloud-profile-service';
 import { openWhatsApp } from '../profile/whatsapp';
-import { recordListingInquiry, recordListingView, setCloudListingFavorite } from './listing-service';
+import { getCloudFavoriteListingIds, recordListingInquiry, recordListingView, setCloudListingFavorite } from './listing-service';
 
 export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: { onBack: () => void; onChat: () => void; onOpenVendor: () => void; listing?: LocalListing }) {
   const imageSource = listing?.imageUrls[0] ? { uri: listing.imageUrls[0] } : require('../../../assets/listings/smart-watch-orange.png');
@@ -15,7 +15,7 @@ export function ListingDetailsScreen({ onBack, onChat, onOpenVendor, listing }: 
   const { width } = useWindowDimensions();
   useEffect(() => {
     if (!listing) return;
-    getFavoriteListingIds().then((ids) => setIsFavorite(ids.includes(listing.id))).catch(() => undefined);
+    Promise.all([getFavoriteListingIds(), getCloudFavoriteListingIds().catch((): string[] => [])]).then(([localIds, cloudIds]) => setIsFavorite(localIds.includes(listing.id) || Boolean(listing.cloudId && cloudIds.includes(listing.cloudId)))).catch(() => undefined);
     recordListingView(listing.cloudId).catch(() => undefined);
   }, [listing]);
   useEffect(() => { setWhatsappContact(undefined); if (listing?.sellerId) getCloudSellerProfile(listing.sellerId).then((profile) => setWhatsappContact(profile?.whatsappContact)).catch(() => undefined); }, [listing?.sellerId]);

@@ -76,6 +76,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /users/{userId}/favorites/{listingId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
     match /vendorApplications/{userId} {
       allow read, create, update: if isSignedIn() && request.auth.uid == userId
         && request.resource.data.userId == userId

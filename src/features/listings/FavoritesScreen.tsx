@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getFavoriteListings, type LocalListing } from './local-listing-service';
+import { getCloudFavoriteListingIds, getCombinedListings } from './listing-service';
 
 export function FavoritesScreen({ onBack, onOpenListing }: { onBack: () => void; onOpenListing: (listing: LocalListing) => void }) {
   const [listings, setListings] = useState<LocalListing[]>([]);
-  useEffect(() => { getFavoriteListings().then(setListings).catch(() => setListings([])); }, []);
+  useEffect(() => { Promise.all([getFavoriteListings(), getCloudFavoriteListingIds().catch((): string[] => [])]).then(async ([local, cloudIds]) => { const cloud = cloudIds.length ? (await getCombinedListings()).filter((item) => item.cloudId && cloudIds.includes(item.cloudId)) : []; const merged = [...local, ...cloud]; setListings(merged.filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id || (candidate.cloudId && cloudIds.includes(candidate.cloudId) && candidate.cloudId === item.cloudId)) === index)); }).catch(() => setListings([])); }, []);
   return <View style={styles.screen}><View style={styles.header}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><Text style={styles.title}>Favorites</Text><Text style={styles.heart}>♥</Text></View><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>{listings.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={styles.card}><Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={styles.image} /><View style={styles.copy}><Text numberOfLines={1} style={styles.name}>{listing.title}</Text><Text style={styles.price}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.location}>⌖ {listing.location}</Text></View><Text style={styles.arrow}>›</Text></Pressable>)}{!listings.length ? <View style={styles.empty}><Text style={styles.emptyTitle}>No favorites yet</Text><Text style={styles.emptyCopy}>Tap the heart on a product to save it here.</Text></View> : null}</ScrollView></View>;
 }
 

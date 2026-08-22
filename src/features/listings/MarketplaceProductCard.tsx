@@ -12,6 +12,7 @@ import {
   toggleLocalFavorite,
   type LocalListing,
 } from './local-listing-service';
+import { setCloudListingFavorite } from './listing-service';
 
 type MarketplaceProductCardProps = {
   listing: LocalListing;
@@ -75,7 +76,9 @@ export function MarketplaceProductCard({
 
   const toggleFavorite = async () => {
     try {
-      setIsFavorite(await toggleLocalFavorite(listing.id));
+      const next = await toggleLocalFavorite(listing.id);
+      setIsFavorite(next);
+      await setCloudListingFavorite(listing.cloudId, next);
     } catch {
       // Keep the card usable if local storage is temporarily unavailable.
     }

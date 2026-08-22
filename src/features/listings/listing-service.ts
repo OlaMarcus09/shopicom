@@ -212,6 +212,19 @@ export async function setCloudListingFavorite(listingId: string | undefined, fav
   if (!reference) return;
   if (favorite) await setDoc(reference, { userId: firebaseAuth.currentUser?.uid, createdAt: serverTimestamp() });
   else await deleteDoc(reference);
+  const user = firebaseAuth.currentUser;
+  if (user) {
+    const favoriteReference = doc(firebaseDb, 'users', user.uid, 'favorites', listingId);
+    if (favorite) await setDoc(favoriteReference, { listingId, createdAt: serverTimestamp() });
+    else await deleteDoc(favoriteReference);
+  }
+}
+
+export async function getCloudFavoriteListingIds() {
+  const user = firebaseAuth.currentUser;
+  if (!user) return [];
+  const snapshot = await getDocs(collection(firebaseDb, 'users', user.uid, 'favorites'));
+  return snapshot.docs.map((item) => item.id);
 }
 
 export async function getListingPerformance(listingId: string): Promise<ListingPerformance> {
