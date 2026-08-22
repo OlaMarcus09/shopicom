@@ -289,7 +289,12 @@ export async function getCombinedListings(maximum = 20): Promise<LocalListing[]>
   const local = await getLocalListings();
   try {
     const cloud = await getLatestListings(maximum);
-    const localCloudKeys = new Set(local.map((item) => `${item.sellerId}:${item.title}:${item.price}`));
+    const cloudById = new Map(cloud.map((item) => [item.id, item]));
+    const mergedLocal = local.map((item) => {
+      const cloudListing = item.cloudId ? cloudById.get(item.cloudId) : undefined;
+      return cloudListing ? { ...item, ...cloudListing, id: item.id, cloudId: cloudListing.id, cloudImageUrls: cloudListing.imageUrls, createdAt: cloudListing.createdAt?.toDate().toISOString() || item.createdAt } : item;
+    });
+    const localCloudKeys = new Set(mergedLocal.map((item) => `${item.sellerId}:${item.title}:${item.price}`));
     const cloudOnly = cloud.filter((item) => !localCloudKeys.has(`${item.sellerId}:${item.title}:${item.price}`)).map((item) => ({
       ...item,
       cloudId: item.id,
@@ -297,8 +302,8 @@ export async function getCombinedListings(maximum = 20): Promise<LocalListing[]>
       createdAt: item.createdAt?.toDate().toISOString() || new Date().toISOString(),
       status: 'active' as const,
     }));
-    return [...local, ...cloudOnly];
+    return [...mergedLocal, ...cloudOnly].filter((listing) => listing.status === 'active');
   } catch {
-    return local;
+    return local.filter((listing) => listing.status === 'active');
   }
 }

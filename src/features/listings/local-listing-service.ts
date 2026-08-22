@@ -97,3 +97,8 @@ export async function updateLocalListing(listingId: string, updates: Partial<Cre
   const listings = await getLocalListings();
   await AsyncStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(listings.map((listing) => listing.id === listingId ? { ...listing, ...updates } : listing)));
 }
+
+export async function updateLocalListingStatus(listingId: string, status: ListingStatus) {
+  const listings = await getLocalListings();
+  await AsyncStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(listings.map((listing) => listing.id === listingId ? { ...listing, status } : listing)));
+}

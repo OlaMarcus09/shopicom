@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { deleteLocalListing, type LocalListing } from './local-listing-service';
+import { deleteLocalListing, type LocalListing, updateLocalListingStatus } from './local-listing-service';
 import { deleteCloudListing, getListingPerformance, getMyListings, updateListingStatus } from './listing-service';
 import type { ListingPerformance } from './listing-types';
 
@@ -41,6 +41,16 @@ export function MyListingsScreen({ onBack, onEditListing, onOpenListing }: { onB
       } },
     ]);
   }
+  async function toggleArchive(listing: LocalListing) {
+    const nextStatus = listing.status === 'archived' ? 'active' : 'archived';
+    try {
+      if (listing.cloudId) await updateListingStatus(listing.cloudId, nextStatus);
+      await updateLocalListingStatus(listing.id, nextStatus);
+      setListings((current) => current.map((item) => item.id === listing.id ? { ...item, status: nextStatus } : item));
+    } catch (error) {
+      Alert.alert('Unable to update listing', error instanceof Error ? error.message : 'Please try again.');
+    }
+  }
 
   return <View style={styles.screen}>
     <View style={styles.header}><Pressable hitSlop={10} onPress={onBack}><Text style={styles.back}>‹</Text></Pressable><Text style={styles.title}>Vendor Dashboard</Text><Text style={styles.count}>{listings.length}</Text></View>
@@ -51,7 +61,7 @@ export function MyListingsScreen({ onBack, onEditListing, onOpenListing }: { onB
     {listings.length ? <View style={styles.grid}>
       {listings.map((listing) => <Pressable key={listing.id} onPress={() => onOpenListing(listing)} style={[styles.card, { width: cardWidth }]}>
         <Image resizeMode="cover" source={{ uri: listing.imageUrls[0] }} style={[styles.image, { width: cardWidth }]} />
-        <View style={styles.cardCopy}><Text numberOfLines={1} style={styles.name}>{listing.title}</Text><Text style={styles.price}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.location}>⌖ {listing.location}</Text><View style={styles.actions}><Text style={[styles.status, listing.status === 'sold' && styles.soldStatus]}>{listing.status === 'sold' ? 'SOLD' : 'ACTIVE'}</Text><Pressable hitSlop={8} onPress={(event) => { event.stopPropagation(); onEditListing(listing); }}><Text style={styles.edit}>Edit</Text></Pressable><Pressable hitSlop={8} onPress={(event) => { event.stopPropagation(); confirmDelete(listing); }}><Text style={styles.delete}>Delete</Text></Pressable></View><Pressable disabled={!listing.cloudId} onPress={async (event) => { event.stopPropagation(); if (listing.cloudId) { const nextStatus = listing.status === 'sold' ? 'active' : 'sold'; await updateListingStatus(listing.cloudId, nextStatus); setListings((current) => current.map((item) => item.id === listing.id ? { ...item, status: nextStatus } : item)); } }}><Text style={styles.markSold}>{listing.status === 'sold' ? 'Mark active' : 'Mark sold'}</Text></Pressable></View>
+        <View style={styles.cardCopy}><Text numberOfLines={1} style={styles.name}>{listing.title}</Text><Text style={styles.price}>GHS {listing.price}</Text><Text numberOfLines={1} style={styles.location}>⌖ {listing.location}</Text><View style={styles.actions}><Text style={[styles.status, listing.status === 'sold' && styles.soldStatus, listing.status === 'archived' && styles.archivedStatus]}>{listing.status === 'sold' ? 'SOLD' : listing.status === 'archived' ? 'ARCHIVED' : 'ACTIVE'}</Text><Pressable hitSlop={8} onPress={(event) => { event.stopPropagation(); onEditListing(listing); }}><Text style={styles.edit}>Edit</Text></Pressable><Pressable hitSlop={8} onPress={(event) => { event.stopPropagation(); confirmDelete(listing); }}><Text style={styles.delete}>Delete</Text></Pressable></View><View style={styles.managementRow}><Pressable onPress={(event) => { event.stopPropagation(); toggleArchive(listing); }}><Text style={styles.archive}>{listing.status === 'archived' ? 'Reactivate' : 'Archive'}</Text></Pressable><Pressable disabled={!listing.cloudId} onPress={async (event) => { event.stopPropagation(); if (listing.cloudId) { const nextStatus = listing.status === 'sold' ? 'active' : 'sold'; await updateListingStatus(listing.cloudId, nextStatus); await updateLocalListingStatus(listing.id, nextStatus); setListings((current) => current.map((item) => item.id === listing.id ? { ...item, status: nextStatus } : item)); } }}><Text style={styles.markSold}>{listing.status === 'sold' ? 'Mark active' : 'Mark sold'}</Text></Pressable></View></View>
       </Pressable>)}
     </View> : <View style={styles.empty}><Text style={styles.emptyTitle}>No listings yet</Text><Text style={styles.emptyCopy}>Products you post will appear here.</Text></View>}
     </ScrollView>
@@ -67,6 +77,6 @@ const styles = StyleSheet.create({
   dashboardContent: { paddingBottom: 30 }, sectionTitle: { color: '#222', fontSize: 15, fontWeight: '800', paddingHorizontal: 14, paddingTop: 16, paddingBottom: 10 }, metricsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 11 }, metric: { flex: 1, minHeight: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#FFF5EF' }, metricValue: { color: '#F45100', fontSize: 20, fontWeight: '900' }, metricLabel: { color: '#777', fontSize: 10, marginTop: 4 }, grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 11, paddingBottom: 30 },
   card: { overflow: 'hidden', borderWidth: 1, borderColor: '#EEE', borderRadius: 13, backgroundColor: '#FFF' },
   image: { height: 142, backgroundColor: '#F7F7F7' },
-  cardCopy: { padding: 10 }, name: { color: '#222', fontSize: 13, fontWeight: '700' }, price: { color: '#F45100', fontSize: 14, fontWeight: '800', marginTop: 5 }, location: { color: '#777', fontSize: 10, marginTop: 5 }, actions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 7 }, status: { color: '#17845D', fontSize: 8, fontWeight: '800', backgroundColor: '#EAF8F2', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 3 }, soldStatus: { color: '#777', backgroundColor: '#F1F1F1' }, edit: { color: '#F45100', fontSize: 10, fontWeight: '700' }, delete: { color: '#D93025', fontSize: 10, fontWeight: '700' }, markSold: { color: '#3C7EF0', fontSize: 10, fontWeight: '700', marginTop: 9 },
+  cardCopy: { padding: 10 }, name: { color: '#222', fontSize: 13, fontWeight: '700' }, price: { color: '#F45100', fontSize: 14, fontWeight: '800', marginTop: 5 }, location: { color: '#777', fontSize: 10, marginTop: 5 }, actions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 7 }, managementRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 9 }, status: { color: '#17845D', fontSize: 8, fontWeight: '800', backgroundColor: '#EAF8F2', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 3 }, soldStatus: { color: '#777', backgroundColor: '#F1F1F1' }, archivedStatus: { color: '#996000', backgroundColor: '#FFF4D6' }, edit: { color: '#F45100', fontSize: 10, fontWeight: '700' }, delete: { color: '#D93025', fontSize: 10, fontWeight: '700' }, archive: { color: '#996000', fontSize: 10, fontWeight: '700' }, markSold: { color: '#3C7EF0', fontSize: 10, fontWeight: '700' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 60 }, emptyTitle: { color: '#222', fontSize: 18, fontWeight: '700' }, emptyCopy: { color: '#777', fontSize: 13, marginTop: 7 },
 });
