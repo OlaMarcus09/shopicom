@@ -7,7 +7,7 @@ import { getLocalProfile, type LocalProfile } from './local-profile-service';
 type Props = { errorMessage: string | null; isSubmitting: boolean; onLogout: () => void; onOpenEditProfile: () => void; onOpenFavorites: () => void; onOpenMyListings: () => void; onOpenVendorOnboarding: () => void; onOpenPolicy: (kind: 'privacy' | 'terms') => void; user: User };
 
 const accountItems = ['My Listings', 'Become a Vendor', 'Favorites', 'Edit Profile', 'Privacy & Security'];
-const supportItems = ['Help & Support', 'Privacy Policy', 'Terms of Service', 'Cookie Policy', 'App Settings'];
+const supportItems = ['Help & Support', 'Privacy Policy', 'Terms of Service', 'App Settings'];
 const aboutItems = ['About Shopicom', 'Rate us on playstore'];
 
 function MenuCard({ items, onPressItem }: { items: string[]; onPressItem?: (item: string) => void }) {
